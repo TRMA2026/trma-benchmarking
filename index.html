@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TRMA Benchmarking Survey</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:system-ui,-apple-system,sans-serif;font-size:14px;color:#222;background:#f4f6fa;min-height:100vh;}
+.nav{background:#1B3A6B;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;}
+.nav-logo{color:#fff;font-weight:600;font-size:17px;}
+.nav-right{display:flex;gap:8px;align-items:center;}
+.nav-status{color:rgba(255,255,255,0.7);font-size:12px;}
+.nav-btn{background:transparent;border:1px solid rgba(255,255,255,0.4);color:#fff;border-radius:6px;padding:5px 13px;cursor:pointer;font-size:13px;}
+.nav-btn:hover{background:rgba(255,255,255,0.1);}
+.page{padding:20px;max-width:960px;margin:0 auto;}
+.card{background:#fff;border:1px solid #D0D8E8;border-radius:10px;padding:20px 24px;margin-bottom:14px;}
+.card-blue{background:#EAF1FB;border-color:#1B3A6B;}
+.card-title{font-size:14px;font-weight:600;color:#1B3A6B;border-bottom:1px solid #D0D8E8;padding-bottom:8px;margin-bottom:12px;}
+.h2{font-size:17px;font-weight:600;color:#1B3A6B;margin-bottom:12px;}
+label{font-size:13px;color:#555;margin-bottom:4px;display:block;}
+select,input[type=password],input[type=text]{width:100%;padding:8px 10px;border-radius:6px;border:1px solid #D0D8E8;font-size:14px;margin-bottom:12px;background:#fff;}
+select:focus,input:focus{outline:none;border-color:#1B3A6B;}
+.btn{background:#1B3A6B;color:#fff;border:none;border-radius:7px;padding:9px 20px;cursor:pointer;font-size:14px;font-weight:600;}
+.btn:hover{background:#15305a;}
+.btn:disabled{opacity:0.6;cursor:not-allowed;}
+.btn-gold{background:#C9A227;color:#fff;border:none;border-radius:7px;padding:9px 20px;cursor:pointer;font-size:14px;font-weight:600;}
+.btn-gold:hover{background:#b08a1f;}
+.btn-gold:disabled{opacity:0.6;cursor:not-allowed;}
+.btn-outline{background:#fff;border:1px solid #1B3A6B;color:#1B3A6B;border-radius:7px;padding:9px 20px;cursor:pointer;font-size:14px;}
+.btn-outline:hover{background:#EAF1FB;}
+.months{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:14px;}
+.month-btn{padding:5px 10px;border-radius:6px;border:1px solid #D0D8E8;background:#fff;color:#333;cursor:pointer;font-size:12px;}
+.month-btn:hover{border-color:#1B3A6B;}
+.month-btn.active{background:#1B3A6B;color:#fff;border-color:#1B3A6B;font-weight:600;}
+.month-pct{font-size:10px;opacity:0.75;margin-left:2px;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th{background:#1B3A6B;color:#fff;padding:8px 10px;text-align:left;font-weight:600;}
+th.r{text-align:center;}
+td{padding:6px 8px;border-bottom:1px solid #f0f2f7;}
+td.r{text-align:center;}
+td.id{font-size:11px;color:#bbb;width:40px;}
+tr.calc-row{background:#EAF1FB;}
+tr.calc-row td.lbl{font-weight:600;color:#1B3A6B;}
+tr.calc-row td.val{font-weight:600;color:#1B3A6B;}
+tr:not(.calc-row):nth-child(even){background:#fafbfd;}
+.num-input{padding:5px 7px;border-radius:5px;border:1px solid #D0D8E8;font-size:13px;width:95px;text-align:right;}
+.num-input:focus{outline:none;border-color:#1B3A6B;}
+.error{color:#c00;font-size:13px;}
+.success-check{font-size:48px;color:#2a7a2a;margin-bottom:12px;}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;}
+.tag{display:inline-block;font-size:11px;padding:2px 8px;border-radius:4px;background:#EAF1FB;color:#1B3A6B;margin-left:8px;}
+.sub-footer{display:flex;justify-content:space-between;align-items:center;padding:10px 0 24px;}
+.hidden{display:none;}
+.admin-toolbar{background:#1B3A6B;padding:0 20px 10px;display:flex;gap:8px;}
+</style>
+</head>
+<body>
+
+<div id="root"></div>
+
+<script>
+const SURL = "https://hktzvlkrimpfreeoehsi.supabase.co/rest/v1/submissions";
+const SKEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhrdHp2bGtyaW1wZnJlZW9laHNpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MjQwNTEsImV4cCI6MjA5MDIwMDA1MX0.1bYxe1z-BFw4N9kvORaBsvGBVZfsw_cSOiOzsOnr3g0";
+const ADMIN_PW = "trajectory-2026!";
+const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+async function sbInsert(payload) {
+  const r = await fetch(SURL, {
+    method: "POST",
+    headers: {"Content-Type":"application/json","apikey":SKEY,"Authorization":"Bearer "+SKEY,"Prefer":"return=minimal"},
+    body: JSON.stringify(payload)
+  });
+  if (!r.ok) { const t = await r.text(); throw new Error(t); }
+}
+
+async function sbSelect() {
+  const r = await fetch(SURL+"?select=*&order=submitted_at.desc", {
+    headers: {"apikey":SKEY,"Authorization":"Bearer "+SKEY}
+  });
+  if (!r.ok) { const t = await r.text(); throw new Error(t); }
+  return r.json();
+}
+
+const FIELDS = [
+  {g:"Applications by Type",items:[
+    {id:"1a",lb:"Prime applications"},
+    {id:"1b",lb:"Subprime applications"},
+    {id:"1c",lb:"No Hits – Bureau (enter 0 if all scored)"},
+    {id:"1d",lb:"Unscored – company initiated (enter 0 if all scored)"},
+    {id:"1.0",lb:"Total Applications",calc:r=>(r["1a"]||0)+(r["1b"]||0)+(r["1c"]||0)+(r["1d"]||0),ro:1}
+  ]},
+  {g:"Applications by Sales Channel",items:[
+    {id:"2a",lb:"Direct – Retail Stores"},{id:"2b",lb:"Direct – Direct Sales"},
+    {id:"2c",lb:"Direct – Call Center"},{id:"2d",lb:"Direct – Company Websites"},{id:"2e",lb:"Direct – Other"},
+    {id:"2.1",lb:"Direct Total",calc:r=>(r["2a"]||0)+(r["2b"]||0)+(r["2c"]||0)+(r["2d"]||0)+(r["2e"]||0),ro:1},
+    {id:"2.2",lb:"Indirect (all types)"},{id:"2.3",lb:"Unknown"},
+    {id:"2.0",lb:"Total Applications (should = 1.0)",calc:r=>(r["2.1"]||0)+(r["2.2"]||0)+(r["2.3"]||0),ro:1}
+  ]},
+  {g:"No Hits",items:[
+
+    {id:"3a",lb:"Bureau No Hits"},{id:"3b",lb:"Company No Hits"},
+    {id:"3.0",lb:"Total No Hits",calc:r=>(r["3a"]||0)+(r["3b"]||0),ro:1}
+  ]},
+  {g:"Manual Reviews",items:[
+    {id:"4.1",lb:"Direct (all direct channels)"},{id:"4.2",lb:"Indirect"},{id:"4.3",lb:"Unknown"},
+    {id:"4.0",lb:"Total Manual Reviews",calc:r=>(r["4.1"]||0)+(r["4.2"]||0)+(r["4.3"]||0),ro:1},
+    {id:"5.0",lb:"Manual Reviews rejected due to fraud risk"}
+  ]},
+  {g:"Applications with Risk Mitigation",items:[
+    {id:"6a",lb:"Direct – Retail Stores"},{id:"6b",lb:"Direct – Direct Sales"},
+    {id:"6c",lb:"Direct – Call Center"},{id:"6d",lb:"Direct – Company Websites"},{id:"6e",lb:"Direct – Other"},
+    {id:"6.1",lb:"Direct Total",calc:r=>(r["6a"]||0)+(r["6b"]||0)+(r["6c"]||0)+(r["6d"]||0)+(r["6e"]||0),ro:1},
+    {id:"6.2",lb:"Indirect"},{id:"6.3",lb:"Unknown"},
+    {id:"6.0",lb:"Total Risk Mitigation",calc:r=>(r["6.1"]||0)+(r["6.2"]||0)+(r["6.3"]||0),ro:1},
+    {id:"7.0",lb:"Security Deposits assessed"}
+  ]},
+  {g:"Activations by Type",items:[
+    {id:"8a",lb:"Prime activations"},{id:"8b",lb:"Subprime activations"},
+    {id:"8c",lb:"No-Hits activations (enter 0 if all scored)"},{id:"8d",lb:"Unscored – company initiated"},
+    {id:"8.0",lb:"Total Activations",calc:r=>(r["8a"]||0)+(r["8b"]||0)+(r["8c"]||0)+(r["8d"]||0),ro:1}
+  ]},
+  {g:"Activations by Sales Channel",items:[
+    {id:"9a",lb:"Direct – Retail Stores"},{id:"9b",lb:"Direct – Direct Sales"},
+    {id:"9c",lb:"Direct – Call Center"},{id:"9d",lb:"Direct – Carrier Websites"},{id:"9e",lb:"Direct – Other"},
+    {id:"9.1",lb:"Direct Total",calc:r=>(r["9a"]||0)+(r["9b"]||0)+(r["9c"]||0)+(r["9d"]||0)+(r["9e"]||0),ro:1},
+    {id:"9.2",lb:"Indirect"},{id:"9.3",lb:"Unknown"},
+    {id:"9.0",lb:"Total Activations (should = 8.0)",calc:r=>(r["9.1"]||0)+(r["9.2"]||0)+(r["9.3"]||0),ro:1}
+  ]},
+  {g:"Activation – Manual Reviews",items:[
+    {id:"10.1",lb:"Direct"},{id:"10.2",lb:"Indirect"},{id:"10.3",lb:"Unknown"},
+    {id:"10.0",lb:"Total",calc:r=>(r["10.1"]||0)+(r["10.2"]||0)+(r["10.3"]||0),ro:1}
+  ]},
+  {g:"Activation – Risk Mitigation & Security Deposits",items:[
+    {id:"11.0",lb:"Risk Mitigation – Total Activations"},
+    {id:"11a",lb:"Security Deposit – Direct Retail"},{id:"11b",lb:"Security Deposit – Direct Sales"},
+    {id:"11c",lb:"Security Deposit – Call Center"},{id:"11d",lb:"Security Deposit – Company Websites"},{id:"11e",lb:"Security Deposit – Other"},
+    {id:"11.1",lb:"Security Deposit Direct Total",calc:r=>(r["11a"]||0)+(r["11b"]||0)+(r["11c"]||0)+(r["11d"]||0)+(r["11e"]||0),ro:1},
+    {id:"11.2",lb:"Security Deposit – Indirect"},{id:"11.3",lb:"Security Deposit – Unknown"}
+  ]},
+  {g:"Retention – Active Accounts by Credit Class",items:[
+    {id:"12.1",lb:"Prime active accounts"},{id:"12.2",lb:"Subprime active accounts"},
+    {id:"12.3",lb:"Unscored – customer initiated"},{id:"12.4",lb:"Unscored – company decision"},
+    {id:"12.0",lb:"Total Active Accounts",calc:r=>(r["12.1"]||0)+(r["12.2"]||0)+(r["12.3"]||0)+(r["12.4"]||0),ro:1}
+  ]},
+  {g:"Retention – Active Accounts by Channel",items:[
+    {id:"13a",lb:"Direct – Retail Stores"},{id:"13b",lb:"Direct – Direct Sales"},
+    {id:"13c",lb:"Direct – Call Center"},{id:"13d",lb:"Direct – Company Websites"},{id:"13e",lb:"Direct – Other"},
+    {id:"13.1",lb:"Direct Total",calc:r=>(r["13a"]||0)+(r["13b"]||0)+(r["13c"]||0)+(r["13d"]||0)+(r["13e"]||0),ro:1},
+    {id:"13.2",lb:"Indirect"},{id:"13.3",lb:"Unknown"},
+    {id:"13.0",lb:"Total Active Accounts (should = 12.0)",calc:r=>(r["13.1"]||0)+(r["13.2"]||0)+(r["13.3"]||0),ro:1}
+  ]},
+  {g:"Retention – Survival & Disconnections",items:[
+    {id:"14.0",lb:"Activations from 6 months prior"},{id:"15.0",lb:"Of those, still active today"},
+    {id:"16a",lb:"Involuntary disconnections"},{id:"16b",lb:"Voluntary disconnections"},
+    {id:"16.0",lb:"Total Hard Disconnections",calc:r=>(r["16a"]||0)+(r["16b"]||0),ro:1},
+    {id:"17.0",lb:"Soft disconnections"}
+  ]},
+  {g:"Credit Costs",items:[{id:"19.0",lb:"Credit evaluation operational costs ($)"}]}
+];
+
+const METRICS = [
+  {id:"A1p",lb:"A1 Prime %",n:r=>r["1a"]||0,d:r=>(r["1a"]||0)+(r["1b"]||0)},
+  {id:"A1s",lb:"A1 Subprime %",n:r=>r["1b"]||0,d:r=>(r["1a"]||0)+(r["1b"]||0)},
+  {id:"A3",lb:"A3.1 No Hit %",n:r=>r["3.0"]||0,d:r=>r["1.0"]||0},
+  {id:"A4",lb:"A4.1 Manual Review %",n:r=>r["4.0"]||0,d:r=>r["1.0"]||0},
+  {id:"A5",lb:"A5 Fraud Rejection %",n:r=>r["5.0"]||0,d:r=>r["4.0"]||0},
+  {id:"A6",lb:"A6.1 Risk Mitigation %",n:r=>r["6.0"]||0,d:r=>r["1.0"]||0},
+  {id:"A11",lb:"A11.1 Activation Rate",n:r=>r["8.0"]||0,d:r=>r["1.0"]||0},
+  {id:"B12",lb:"B12 6-Month Survival Rate",n:r=>r["15.0"]||0,d:r=>r["14.0"]||0},
+];
+
+// ── State ──────────────────────────────────────────────
+let S = {
+  view: "landing",
+  profile: {country:"", entityType:""},
+  data: emptyData(),
+  month: "Jan",
+  pw: "",
+  pwErr: "",
+  subs: [],
+  loading: false,
+  submitting: false,
+  err: "",
+  status: "",
+  rMonth: "Jan"
+};
+
+function emptyData() { return Object.fromEntries(MONTHS.map(m=>[m,{}])); }
+
+function calcRow(row) {
+  const o = {...row};
+  FIELDS.forEach(g => g.items.forEach(f => { if(f.calc) o[f.id] = f.calc(o); }));
+  return o;
+}
+
+function compPct(month) {
+  const row = calcRow(S.data[month]||{});
+  const ent = FIELDS.flatMap(g=>g.items.filter(f=>!f.ro));
+  return Math.round(ent.filter(f=>row[f.id]!==undefined).length/ent.length*100);
+}
+
+function setState(patch) { Object.assign(S, patch); render(); }
+
+// ── Actions ────────────────────────────────────────────
+async function handleSubmit() {
+  setState({submitting:true, err:"", status:"Saving your submission…"});
+  const token = "sub_"+Date.now()+"_"+Math.random().toString(36).slice(2,6);
+  try {
+    await sbInsert({token, country:S.profile.country, entity_type:S.profile.entityType, data:S.data, submitted_at:new Date().toISOString()});
+    setState({submitting:false, status:"", view:"submitted"});
+  } catch(e) {
+    setState({submitting:false, status:"", err:"Submission error: "+e.message});
+  }
+}
+
+async function handleAdminLogin() {
+  if(S.pw !== ADMIN_PW) { setState({pwErr:"Incorrect password."}); return; }
+  setState({loading:true, status:"Loading submissions…"});
+  try {
+    const d = await sbSelect();
+    setState({subs:Array.isArray(d)?d:[], loading:false, status:"", view:"admin"});
+  } catch(e) {
+    setState({loading:false, status:"", pwErr:"Error: "+e.message});
+  }
+}
+
+async function handleRefresh() {
+  setState({loading:true, status:"Refreshing…"});
+  try {
+    const d = await sbSelect();
+    setState({subs:Array.isArray(d)?d:[], loading:false, status:""});
+  } catch(e) {
+    setState({loading:false, status:"", err:e.message});
+  }
+}
+
+function exportCSV() {
+  const allF = FIELDS.flatMap(g=>g.items.map(f=>f.id));
+  const hdr = ["token","submitted_at","country","entity_type",...MONTHS.flatMap(m=>allF.map(f=>m+"_"+f))];
+  const rows = S.subs.map(s=>[s.token,s.submitted_at,s.country||"",s.entity_type||"",...MONTHS.flatMap(m=>allF.map(f=>{const r=calcRow(s.data?.[m]||{});return r[f]??""}))]);
+  const csv = [hdr,...rows].map(r=>r.join(",")).join("\n");
+  const a = document.createElement("a");
+  a.href = "data:text/csv;charset=utf-8,"+encodeURIComponent(csv);
+  a.download = "TRMA_Submissions.csv"; a.click();
+}
+
+function setVal(month, id, val) {
+  S.data[month] = S.data[month]||{};
+  S.data[month][id] = val===""?undefined:parseFloat(val)||0;
+  render();
+}
+
+function agg(m) {
+  if(!S.subs.length) return null;
+  const res = {};
+  METRICS.forEach(met => {
+    const vals = S.subs.map(s=>{const row=calcRow(s.data?.[m]||{});const n=met.n(row),d=met.d(row);return d?n/d*100:null;}).filter(v=>v!==null);
+    if(!vals.length){res[met.id]=null;return;}
+    const sorted=[...vals].sort((a,b)=>a-b);
+    res[met.id]={avg:vals.reduce((a,b)=>a+b,0)/vals.length,med:sorted[Math.floor(sorted.length/2)],min:sorted[0],max:sorted[sorted.length-1],n:vals.length};
+  });
+  return res;
+}
+
+// ── Render ─────────────────────────────────────────────
+function render() {
+  const root = document.getElementById("root");
+
+  function nav(title, backLabel, backFn) {
+    return `<div class="nav">
+      <span class="nav-logo">${title}</span>
+      <div class="nav-right">
+        ${S.status?`<span class="nav-status">${S.status}</span>`:""}
+        ${backLabel?`<button class="nav-btn" onclick="${backFn}">${backLabel}</button>`:""}
+      </div>
+    </div>`;
+  }
+
+  if(S.view==="landing") {
+    root.innerHTML = nav("TRMA Benchmarking") + `
+    <div class="page">
+      <div class="card card-blue">
+        <div style="font-size:21px;font-weight:700;color:#1B3A6B;margin-bottom:8px;">TRMA Industry Benchmarking Survey</div>
+        <p style="font-size:14px;color:#444;line-height:1.6;margin-bottom:18px;">Submit your company's Phase A (Acquisition & Retention) data anonymously. Your submission will be aggregated with peers to generate industry benchmarks shared with all participants.</p>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;">
+          <button class="btn" onclick="goTo('profile')">Start Data Entry</button>
+          <button class="btn-outline" onclick="goTo('report')">View Benchmark Report</button>
+        </div>
+      </div>
+      <div class="grid3">
+        <div class="card"><strong style="color:#1B3A6B;">Anonymous</strong><p style="font-size:13px;color:#555;margin-top:5px;line-height:1.5;">No company name stored — submissions use a random token only.</p></div>
+        <div class="card"><strong style="color:#1B3A6B;">Secure</strong><p style="font-size:13px;color:#555;margin-top:5px;line-height:1.5;">Stored in TRMA's private Supabase database, encrypted at rest and in transit.</p></div>
+        <div class="card"><strong style="color:#1B3A6B;">Phase A</strong><p style="font-size:13px;color:#555;margin-top:5px;line-height:1.5;">Covers Acquisition & Retention across 12 monthly data points.</p></div>
+      </div>
+      <div style="text-align:right;margin-top:4px;"><button onclick="goTo('admin_login')" style="background:transparent;border:none;color:#bbb;font-size:12px;cursor:pointer;">Admin access</button></div>
+    </div>`;
+  }
+
+  else if(S.view==="profile") {
+    root.innerHTML = nav("TRMA Benchmarking","← Back","goTo('landing')") + `
+    <div class="page"><div class="card" style="max-width:500px;">
+      <div class="h2">Company Profile</div>
+      <p style="font-size:13px;color:#666;margin-bottom:16px;">Used only for aggregate disaggregation — not linked to your submission identity.</p>
+      <label>Country</label>
+      <select onchange="S.profile.country=this.value">
+        <option value="">Select...</option>
+        <option ${S.profile.country==="United States"?"selected":""}>United States</option>
+        <option ${S.profile.country==="Canada"?"selected":""}>Canada</option>
+      </select>
+      <label>Entity Type</label>
+      <select onchange="S.profile.entityType=this.value">
+        <option value="">Select...</option>
+        <option ${S.profile.entityType==="Fixed Services Carrier"?"selected":""}>Fixed Services Carrier</option>
+        <option ${S.profile.entityType==="Wireless Carrier"?"selected":""}>Wireless Carrier</option>
+      </select>
+      <button class="btn" onclick="if(S.profile.country&&S.profile.entityType)goTo('entry')">Continue to Data Entry →</button>
+    </div></div>`;
+  }
+
+  else if(S.view==="entry") {
+    const row = calcRow(S.data[S.month]||{});
+    const overall = Math.round(MONTHS.reduce((a,m)=>a+compPct(m),0)/12);
+    const monthBtns = MONTHS.map(m=>{
+      const p=compPct(m);
+      return `<button class="month-btn${m===S.month?" active":""}" onclick="S.month='${m}';render()">${m}${p>0?`<span class="month-pct">${p}%</span>`:""}</button>`;
+    }).join("");
+    const sections = FIELDS.map(grp=>{
+      const rows = grp.items.map(f=>{
+        const val = f.ro ? row[f.id] : (S.data[S.month]?.[f.id]??"");
+        if(f.ro) return `<tr class="calc-row"><td class="id">${f.id}</td><td class="lbl">${f.lb}</td><td class="r val">${val!=null?Number(val).toLocaleString():"—"}</td></tr>`;
+        return `<tr><td class="id">${f.id}</td><td>${f.lb}</td><td class="r"><input class="num-input" type="number" min="0" value="${val}" data-month="${S.month}" data-id="${f.id}" onblur="setVal(this.dataset.month,this.dataset.id,this.value)" placeholder="—"></td></tr>`;
+      }).join("");
+      return `<div class="card"><div class="card-title">${grp.g}</div><table>${rows}</table></div>`;
+    }).join("");
+    root.innerHTML = nav("TRMA Benchmarking — Phase A","← Profile","goTo('profile')") + `
+    <div class="page">
+      <div class="months">${monthBtns}</div>
+      <p style="font-size:13px;color:#666;margin-bottom:12px;">Enter whole number counts. Blue rows are auto-calculated. Enter 0 where applicable — do not leave fields blank.</p>
+      ${sections}
+      <div class="sub-footer">
+        <div style="font-size:13px;color:#666;">Overall: <strong>${overall}%</strong> complete across all months</div>
+        <div style="display:flex;gap:10px;align-items:center;">
+          ${S.err?`<span class="error">${S.err}</span>`:""}
+          <button class="btn-gold" onclick="handleSubmit()" ${S.submitting?"disabled":""}>${S.submitting?"Submitting…":"Submit Anonymously →"}</button>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  else if(S.view==="submitted") {
+    root.innerHTML = nav("TRMA Benchmarking") + `
+    <div class="page"><div class="card" style="text-align:center;padding:48px 24px;">
+      <div class="success-check">✓</div>
+      <div style="font-size:20px;font-weight:700;color:#1B3A6B;margin-bottom:8px;">Submission received</div>
+      <p style="font-size:14px;color:#555;line-height:1.6;margin-bottom:24px;">Your data has been securely stored in TRMA's private database and will be included in the aggregate benchmark report shared with all participants.</p>
+      <button class="btn" onclick="S.data=emptyData();S.profile={country:'',entityType:''};goTo('landing')">Submit another response</button>
+    </div></div>`;
+  }
+
+  else if(S.view==="admin_login") {
+    root.innerHTML = nav("TRMA Admin","← Back","goTo('landing')") + `
+    <div class="page"><div class="card" style="max-width:360px;margin:48px auto;">
+      <div class="h2">Admin access</div>
+      <label>Password</label>
+      <input type="password" id="apw" placeholder="Enter password" value="${S.pw}" oninput="S.pw=this.value" onkeydown="if(event.key==='Enter')handleAdminLogin()">
+      ${S.pwErr?`<p class="error" style="margin-bottom:8px;">${S.pwErr}</p>`:""}
+      <button class="btn" onclick="handleAdminLogin()" ${S.loading?"disabled":""}>${S.loading?"Loading…":"Sign in"}</button>
+    </div></div>`;
+  }
+
+  else if(S.view==="admin") {
+    const subCards = S.subs.map((s,i)=>{
+      const tot=Math.round(MONTHS.reduce((acc,m)=>{const row=calcRow(s.data?.[m]||{});const ent=FIELDS.flatMap(g=>g.items.filter(f=>!f.ro));return acc+ent.filter(f=>row[f.id]!==undefined).length/ent.length;},0)/12*100);
+      return `<div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div><strong style="color:#1B3A6B;">#${i+1} — ${s.entity_type||"Unknown"} / ${s.country||"Unknown"}</strong><span class="tag">${tot}% complete</span></div>
+          <div style="font-size:12px;color:#aaa;">${s.submitted_at?new Date(s.submitted_at).toLocaleDateString():""}</div>
+        </div>
+        <div style="font-size:11px;color:#ccc;margin-top:3px;">Token: ${s.token}</div>
+      </div>`;
+    }).join("");
+    root.innerHTML = nav("TRMA Admin — "+S.subs.length+" submission"+(S.subs.length!==1?"s":"")) + `
+    <div class="admin-toolbar">
+      <button class="nav-btn" onclick="handleRefresh()">Refresh</button>
+      <button class="nav-btn" onclick="exportCSV()">Export CSV</button>
+      <button class="nav-btn" onclick="goTo('landing')">← Exit</button>
+    </div>
+    <div class="page">
+      ${S.loading?"<p style='color:#888;margin:16px 0;'>Loading…</p>":""}
+      ${!S.loading&&S.subs.length===0?"<p style='color:#888;'>No submissions yet.</p>":""}
+      ${S.err?`<p class="error" style="margin-bottom:12px;">${S.err}</p>`:""}
+      ${subCards}
+    </div>`;
+  }
+
+  else if(S.view==="report") {
+    const ag = agg(S.rMonth);
+    const monthBtns = MONTHS.map(m=>`<button class="month-btn${m===S.rMonth?" active":""}" onclick="S.rMonth='${m}';render()">${m}</button>`).join("");
+    const trows = METRICS.map((m,i)=>{
+      const d=ag?.[m.id];
+      const bg=i%2===0?"#fff":"#EAF1FB";
+      if(!d) return `<tr style="background:${bg}"><td>${m.lb}</td><td colspan="5" class="r" style="color:#bbb;">insufficient data</td></tr>`;
+      return `<tr style="background:${bg}"><td>${m.lb}</td><td class="r" style="font-weight:600;color:#1B3A6B;">${d.avg.toFixed(1)}%</td><td class="r">${d.med.toFixed(1)}%</td><td class="r" style="color:#b00;">${d.min.toFixed(1)}%</td><td class="r" style="color:#2a7a2a;">${d.max.toFixed(1)}%</td><td class="r" style="color:#888;">${d.n}</td></tr>`;
+    }).join("");
+    root.innerHTML = nav("TRMA Benchmark Report","← Back","goTo('landing')") + `
+    <div class="page"><div class="card">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
+        <strong style="color:#1B3A6B;">Month:</strong>
+        <div class="months" style="margin:0;">${monthBtns}</div>
+      </div>
+      ${!S.subs.length
+        ?`<p style="color:#888;font-size:14px;">No submissions yet. The report will populate once members submit data.</p>`
+        :`<p style="font-size:13px;color:#666;margin-bottom:12px;">Based on ${S.subs.length} submission${S.subs.length!==1?"s":""} — ${S.rMonth}</p>
+          <table><thead><tr><th>Metric</th><th class="r">Avg</th><th class="r">Median</th><th class="r">Min</th><th class="r">Max</th><th class="r">n</th></tr></thead><tbody>${trows}</tbody></table>`
+      }
+    </div></div>`;
+  }
+}
+
+function goTo(v) { S.view=v; S.err=""; S.pwErr=""; S.status=""; render(); }
+render();
+</script>
+</body>
+</html>
