@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TRMA Benchmarking — Upload Data</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root {
+  --navy: #1B3A5C;
+  --blue: #2176BC;
+  --light-blue: #E8F0FE;
+  --green: #28a745;
+  --amber: #f0ad4e;
+  --red: #dc3545;
+  --bg: #f8f9fa;
+  --card: #ffffff;
+  --text: #333333;
+  --muted: #6c757d;
+  --border: #dee2e6;
+  --radius: 8px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+
+.header { background: var(--navy); color: #fff; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; }
+.header h1 { font-size: 20px; font-weight: 600; }
+.header a { color: #a8c8e8; text-decoration: none; font-size: 14px; }
+.header a:hover { color: #fff; }
+
+.container { max-width: 960px; margin: 0 auto; padding: 24px; }
+
+.card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; margin-bottom: 20px; }
+.card h2 { font-size: 18px; color: var(--navy); margin-bottom: 12px; }
+.card p { color: var(--muted); font-size: 14px; margin-bottom: 16px; }
+
+.steps { display: flex; gap: 0; margin-bottom: 24px; }
+.step { flex: 1; text-align: center; padding: 12px 8px; font-size: 13px; font-weight: 500; color: var(--muted); background: #f0f0f0; border-bottom: 3px solid transparent; position: relative; }
+.step.active { color: var(--navy); background: var(--light-blue); border-bottom-color: var(--blue); }
+.step.done { color: var(--green); background: #e8f5e9; border-bottom-color: var(--green); }
+.step:first-child { border-radius: var(--radius) 0 0 0; }
+.step:last-child { border-radius: 0 var(--radius) 0 0; }
+.step-num { display: inline-block; width: 22px; height: 22px; line-height: 22px; border-radius: 50%; background: var(--muted); color: #fff; font-size: 11px; margin-right: 6px; }
+.step.active .step-num { background: var(--blue); }
+.step.done .step-num { background: var(--green); }
+
+.drop-zone { border: 2px dashed var(--border); border-radius: var(--radius); padding: 48px 24px; text-align: center; cursor: pointer; transition: all 0.2s; background: #fafbfc; }
+.drop-zone:hover, .drop-zone.dragover { border-color: var(--blue); background: var(--light-blue); }
+.drop-zone svg { width: 48px; height: 48px; color: var(--muted); margin-bottom: 12px; }
+.drop-zone p { color: var(--muted); font-size: 14px; }
+.drop-zone .browse { color: var(--blue); font-weight: 500; text-decoration: underline; cursor: pointer; }
+input[type="file"] { display: none; }
+
+.summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 20px; }
+.summary-item { background: var(--light-blue); border-radius: var(--radius); padding: 14px; text-align: center; }
+.summary-item .count { font-size: 28px; font-weight: 700; color: var(--navy); }
+.summary-item .label { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+.phase-detail { border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 12px; overflow: hidden; }
+.phase-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #f8f9fa; cursor: pointer; user-select: none; }
+.phase-header:hover { background: #f0f1f2; }
+.phase-header h3 { font-size: 14px; color: var(--navy); }
+.phase-badge { font-size: 12px; padding: 2px 10px; border-radius: 12px; font-weight: 500; }
+.phase-badge.good { background: #e8f5e9; color: #2e7d32; }
+.phase-badge.partial { background: #fff3e0; color: #e65100; }
+.phase-badge.empty { background: #f5f5f5; color: #999; }
+.phase-body { display: none; padding: 12px 16px; font-size: 13px; max-height: 300px; overflow-y: auto; }
+.phase-body.open { display: block; }
+.phase-body table { width: 100%; border-collapse: collapse; }
+.phase-body th, .phase-body td { padding: 4px 8px; text-align: left; border-bottom: 1px solid #f0f0f0; }
+.phase-body th { font-weight: 500; color: var(--muted); font-size: 11px; text-transform: uppercase; position: sticky; top: 0; background: #fff; }
+.phase-body td.ref { color: var(--muted); font-size: 12px; }
+.phase-body td.val { font-variant-numeric: tabular-nums; }
+.phase-body td.val.has-data { color: var(--navy); font-weight: 500; }
+.phase-body td.val.empty { color: #ccc; }
+
+.profile-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+.profile-fields label { font-size: 13px; font-weight: 500; color: var(--navy); display: block; margin-bottom: 4px; }
+.profile-fields select { width: 100%; padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; background: #fff; }
+
+.btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 24px; border: none; border-radius: 6px; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.15s; }
+.btn-primary { background: var(--blue); color: #fff; }
+.btn-primary:hover { background: #1a65a3; }
+.btn-primary:disabled { background: #a0c4e8; cursor: not-allowed; }
+.btn-secondary { background: #fff; color: var(--navy); border: 1px solid var(--border); }
+.btn-secondary:hover { background: #f8f9fa; }
+.btn-success { background: var(--green); color: #fff; }
+.btn-success:hover { background: #218838; }
+
+.actions { display: flex; gap: 12px; justify-content: flex-end; margin-top: 20px; }
+
+.alert { padding: 12px 16px; border-radius: var(--radius); font-size: 14px; margin-bottom: 16px; }
+.alert-error { background: #fdecea; color: #b71c1c; border: 1px solid #f5c6cb; }
+.alert-success { background: #e8f5e9; color: #1b5e20; border: 1px solid #c8e6c9; }
+.alert-info { background: var(--light-blue); color: var(--navy); border: 1px solid #b8d4f0; }
+
+.spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid #fff; border-top-color: transparent; border-radius: 50%; animation: spin 0.6s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.hidden { display: none !important; }
+
+.result-box { text-align: center; padding: 40px 24px; }
+.result-box svg { width: 64px; height: 64px; margin-bottom: 16px; }
+.result-box h2 { color: var(--green); margin-bottom: 8px; }
+.result-box p { color: var(--muted); max-width: 400px; margin: 0 auto; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>TRMA Benchmarking — Upload Data</h1>
+  <a href="index.html">&larr; Back to Dashboard</a>
+</div>
+
+<div class="container">
+
+  <!-- Step indicator -->
+  <div class="steps">
+    <div class="step active" id="step1-ind"><span class="step-num">1</span>Upload File</div>
+    <div class="step" id="step2-ind"><span class="step-num">2</span>Review Data</div>
+    <div class="step" id="step3-ind"><span class="step-num">3</span>Confirm &amp; Submit</div>
+  </div>
+
+  <!-- STEP 1: Upload -->
+  <div id="step1" class="card">
+    <h2>Upload Your Completed Template</h2>
+    <p>Select the TRMA Rapid Survey Excel file you've filled in. We'll parse it and show you a summary before submitting.</p>
+
+    <div class="drop-zone" id="dropZone">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
+      </svg>
+      <p>Drag &amp; drop your .xlsx file here, or <span class="browse" onclick="document.getElementById('fileInput').click()">browse</span></p>
+      <p style="font-size:12px;margin-top:8px;color:#aaa">Accepts .xlsx files only</p>
+    </div>
+    <input type="file" id="fileInput" accept=".xlsx,.xls">
+
+    <div id="parseError" class="alert alert-error hidden"></div>
+  </div>
+
+  <!-- STEP 2: Review -->
+  <div id="step2" class="card hidden">
+    <h2>Review Parsed Data</h2>
+    <p>Here's what we found in your upload. Click any phase to inspect individual fields.</p>
+
+    <div class="summary-grid" id="summaryGrid"></div>
+    <div id="phaseDetails"></div>
+
+    <div class="actions">
+      <button class="btn btn-secondary" onclick="resetUpload()">Upload Different File</button>
+      <button class="btn btn-primary" onclick="goToStep3()">Looks Good &rarr;</button>
+    </div>
+  </div>
+
+  <!-- STEP 3: Confirm & Submit -->
+  <div id="step3" class="card hidden">
+    <h2>Company Profile &amp; Submit</h2>
+    <p>Optional: provide your entity details for disaggregated reporting. Your submission remains anonymous.</p>
+
+    <div class="profile-fields">
+      <div>
+        <label for="country">Country</label>
+        <select id="country">
+          <option value="">— Select —</option>
+          <option value="US">United States</option>
+          <option value="CA">Canada</option>
+        </select>
+      </div>
+      <div>
+        <label for="entityType">Entity Type</label>
+        <select id="entityType">
+          <option value="">— Select —</option>
+          <option value="Fixed">Fixed Services</option>
+          <option value="Wireless">Wireless Carrier</option>
+          <option value="Cable">Cable / Broadband</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="alert alert-info">
+      Your data will be submitted anonymously with a random session token. No company name is stored.
+    </div>
+
+    <div id="submitError" class="alert alert-error hidden"></div>
+
+    <div class="actions">
+      <button class="btn btn-secondary" onclick="goToStep2()">&larr; Back to Review</button>
+      <button class="btn btn-success" id="submitBtn" onclick="submitData()">Submit Data</button>
+    </div>
+  </div>
+
+  <!-- STEP 4: Success -->
+  <div id="step4" class="card hidden">
+    <div class="result-box">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#28a745" stroke-width="1.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+      <h2>Submission Complete!</h2>
+      <p>Your benchmarking data has been received. It will be combined with other members' submissions to generate industry benchmarks.</p>
+      <p style="margin-top:12px;font-size:13px;color:#999" id="tokenDisplay"></p>
+      <div class="actions" style="justify-content:center;margin-top:24px">
+        <button class="btn btn-primary" onclick="window.location.href='index.html'">Return to Dashboard</button>
+        <button class="btn btn-secondary" onclick="resetUpload()">Upload Another</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ============================================================
+// CONFIG
+// ============================================================
+const SUPABASE_URL = 'https://hktzvlkrimpfreeoehsi.supabase.co';
+const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhrdHp2bGtyaW1wZnJlZW9laHNpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MjQwNTEsImV4cCI6MjA5MDIwMDA1MX0.1bYxe1z-BFw4N9kvORaBsvGBVZfsw_cSOiOzsOnr3g0';
+
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+const PHASE_MAP = {
+  'A': { match: /phase\s*a|acquisition|retention/i, name: 'Acquisition & Retention' },
+  'B': { match: /phase\s*b|decision/i, name: 'Decision' },
+  'C': { match: /phase\s*c|payment/i, name: 'Payments' },
+  'D': { match: /phase\s*d|accounts?\s*receivable/i, name: 'Accounts Receivable' },
+  'E': { match: /phase\s*e|write.?off/i, name: 'Write-Off' },
+  'F': { match: /phase\s*f|recovery/i, name: 'Recovery' },
+};
+
+let parsedData = {};   // { ref_code: { Jan: val, Feb: val, ... } }
+let phaseSummary = {}; // { A: { fields: 12, filled: 8 }, ... }
+
+// ============================================================
+// DRAG & DROP + FILE INPUT
+// ============================================================
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+
+dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+dropZone.addEventListener('drop', (e) => {
+  e.preventDefault();
+  dropZone.classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file) handleFile(file);
+});
+fileInput.addEventListener('change', (e) => {
+  if (e.target.files[0]) handleFile(e.target.files[0]);
+});
+
+// ============================================================
+// FILE PARSING
+// ============================================================
+function handleFile(file) {
+  const errorEl = document.getElementById('parseError');
+  errorEl.classList.add('hidden');
+
+  if (!file.name.match(/\.xlsx?$/i)) {
+    errorEl.textContent = 'Please upload an .xlsx file. Other formats are not supported.';
+    errorEl.classList.remove('hidden');
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      parseWorkbook(e.target.result);
+      goToStep2();
+    } catch (err) {
+      errorEl.textContent = 'Error parsing file: ' + err.message;
+      errorEl.classList.remove('hidden');
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function parseWorkbook(data) {
+  const wb = XLSX.read(data, { type: 'array' });
+  parsedData = {};
+  phaseSummary = {};
+
+  for (const sheetName of wb.SheetNames) {
+    // Determine which phase this sheet belongs to
+    let phaseCode = null;
+    for (const [code, cfg] of Object.entries(PHASE_MAP)) {
+      if (cfg.match.test(sheetName)) { phaseCode = code; break; }
+    }
+    if (!phaseCode) continue; // Skip instruction sheets etc.
+
+    const ws = wb.Sheets[sheetName];
+    const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+
+    // Find the header row (contains "Ref" and "January")
+    let headerRow = -1;
+    let refCol = -1;
+    let monthCols = {};
+
+    for (let r = 0; r < Math.min(rows.length, 10); r++) {
+      const row = rows[r];
+      if (!row) continue;
+      for (let c = 0; c < row.length; c++) {
+        const val = String(row[c]).trim().toLowerCase();
+        if (val === 'ref') refCol = c;
+        if (val === 'january') {
+          headerRow = r;
+          // Map month columns
+          for (let m = 0; m < 12; m++) {
+            const monthVal = String(row[c + m] || '').trim();
+            if (MONTHS.includes(monthVal)) {
+              monthCols[MONTHS[m]] = c + m;
+            }
+          }
+          break;
+        }
+      }
+      if (headerRow >= 0) break;
+    }
+
+    if (headerRow < 0 || refCol < 0) continue;
+
+    let fieldsFound = 0;
+    let fieldsFilled = 0;
+
+    // Parse data rows
+    for (let r = headerRow + 1; r < rows.length; r++) {
+      const row = rows[r];
+      if (!row) continue;
+
+      const ref = String(row[refCol] || '').trim();
+      if (!ref || ref.length > 10) continue; // Skip subgroup headers
+
+      // Check if this looks like a valid ref code
+      if (!/^[\d]+[a-z]?$|^[\d]+\.[\d]+$/.test(ref)) continue;
+
+      fieldsFound++;
+      const fieldData = {};
+      let hasAnyData = false;
+
+      for (const [month, col] of Object.entries(monthCols)) {
+        const cellVal = row[col];
+        if (cellVal === '' || cellVal === undefined || cellVal === null) {
+          fieldData[month] = null;
+        } else if (typeof cellVal === 'number') {
+          fieldData[month] = cellVal;
+          hasAnyData = true;
+        } else {
+          const str = String(cellVal).trim().toUpperCase();
+          if (str === 'NA' || str === 'N/A') {
+            fieldData[month] = 'NA';
+          } else {
+            const num = parseFloat(str.replace(/[$,%]/g, ''));
+            if (!isNaN(num)) {
+              fieldData[month] = num;
+              hasAnyData = true;
+            } else {
+              fieldData[month] = null;
+            }
+          }
+        }
+      }
+
+      if (hasAnyData) fieldsFilled++;
+      parsedData[ref] = fieldData;
+    }
+
+    phaseSummary[phaseCode] = {
+      name: PHASE_MAP[phaseCode].name,
+      fields: fieldsFound,
+      filled: fieldsFilled,
+      sheetName: sheetName
+    };
+  }
+
+  if (Object.keys(phaseSummary).length === 0) {
+    throw new Error('No valid phase tabs found. Make sure the sheet names contain phase identifiers (e.g., "Phase A", "Acquisition").');
+  }
+}
+
+// ============================================================
+// STEP NAVIGATION
+// ============================================================
+function setStep(num) {
+  for (let i = 1; i <= 4; i++) {
+    document.getElementById('step' + i).classList.toggle('hidden', i !== num);
+    const ind = document.getElementById('step' + i + '-ind');
+    if (ind) {
+      ind.classList.remove('active', 'done');
+      if (i < num) ind.classList.add('done');
+      if (i === num) ind.classList.add('active');
+    }
+  }
+}
+
+function goToStep2() {
+  renderSummary();
+  setStep(2);
+}
+
+function goToStep3() {
+  setStep(3);
+}
+
+function resetUpload() {
+  parsedData = {};
+  phaseSummary = {};
+  fileInput.value = '';
+  document.getElementById('parseError').classList.add('hidden');
+  document.getElementById('submitError').classList.add('hidden');
+  setStep(1);
+}
+
+// ============================================================
+// RENDER SUMMARY (Step 2)
+// ============================================================
+function renderSummary() {
+  const grid = document.getElementById('summaryGrid');
+  const details = document.getElementById('phaseDetails');
+
+  // Top-level counts
+  const totalFields = Object.values(phaseSummary).reduce((s, p) => s + p.fields, 0);
+  const totalFilled = Object.values(phaseSummary).reduce((s, p) => s + p.filled, 0);
+  const totalPhases = Object.keys(phaseSummary).length;
+  const totalDataPoints = Object.values(parsedData).reduce((sum, months) => {
+    return sum + Object.values(months).filter(v => v !== null && v !== 'NA').length;
+  }, 0);
+
+  grid.innerHTML = `
+    <div class="summary-item"><div class="count">${totalPhases}</div><div class="label">Phases Found</div></div>
+    <div class="summary-item"><div class="count">${totalFields}</div><div class="label">Fields Detected</div></div>
+    <div class="summary-item"><div class="count">${totalFilled}</div><div class="label">Fields with Data</div></div>
+    <div class="summary-item"><div class="count">${totalDataPoints.toLocaleString()}</div><div class="label">Data Points</div></div>
+  `;
+
+  // Phase-by-phase details
+  let detailsHTML = '';
+  for (const [code, info] of Object.entries(phaseSummary).sort((a, b) => a[0].localeCompare(b[0]))) {
+    const pct = info.fields > 0 ? Math.round((info.filled / info.fields) * 100) : 0;
+    const badgeClass = pct >= 80 ? 'good' : pct > 0 ? 'partial' : 'empty';
+    const badgeText = pct >= 80 ? `${pct}% complete` : pct > 0 ? `${pct}% partial` : 'No data';
+
+    // Build field table
+    const phaseRefs = Object.keys(parsedData).filter(ref => {
+      // Match refs to phases based on number ranges
+      const num = parseFloat(ref);
+      if (code === 'A') return num >= 1 && num < 20;
+      if (code === 'B') return num >= 20 && num < 30;
+      if (code === 'C') return num >= 30 && num < 40;
+      if (code === 'D') return num >= 40 && num < 50;
+      if (code === 'E') return num >= 49 && num < 55;
+      if (code === 'F') return num >= 60 && num < 70;
+      return false;
+    });
+
+    let tableRows = '';
+    for (const ref of phaseRefs) {
+      const months = parsedData[ref];
+      const filledMonths = Object.entries(months)
+        .filter(([, v]) => v !== null)
+        .map(([m, v]) => {
+          if (v === 'NA') return `<span style="color:#999">NA</span>`;
+          if (typeof v === 'number') return v.toLocaleString();
+          return v;
+        });
+
+      const firstThree = MONTHS.slice(0, 3).map(m => {
+        const v = months[m];
+        if (v === null) return '<td class="val empty">—</td>';
+        if (v === 'NA') return '<td class="val" style="color:#999">NA</td>';
+        return `<td class="val has-data">${typeof v === 'number' ? v.toLocaleString() : v}</td>`;
+      }).join('');
+
+      const filledCount = Object.values(months).filter(v => v !== null && v !== 'NA').length;
+      tableRows += `<tr><td class="ref">${ref}</td>${firstThree}<td class="val" style="color:var(--muted)">${filledCount}/12</td></tr>`;
+    }
+
+    detailsHTML += `
+      <div class="phase-detail">
+        <div class="phase-header" onclick="this.nextElementSibling.classList.toggle('open')">
+          <h3>Phase ${code}: ${info.name}</h3>
+          <span class="phase-badge ${badgeClass}">${badgeText} &middot; ${info.filled}/${info.fields} fields</span>
+        </div>
+        <div class="phase-body">
+          ${phaseRefs.length > 0 ? `
+            <table>
+              <thead><tr><th>Ref</th><th>Jan</th><th>Feb</th><th>Mar</th><th>Months</th></tr></thead>
+              <tbody>${tableRows}</tbody>
+            </table>
+          ` : '<p style="color:#999;padding:8px 0">No data rows found for this phase.</p>'}
+        </div>
+      </div>
+    `;
+  }
+
+  details.innerHTML = detailsHTML;
+}
+
+// ============================================================
+// SUBMIT TO SUPABASE
+// ============================================================
+async function submitData() {
+  const btn = document.getElementById('submitBtn');
+  const errorEl = document.getElementById('submitError');
+  errorEl.classList.add('hidden');
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Submitting...';
+
+  const country = document.getElementById('country').value || null;
+  const entityType = document.getElementById('entityType').value || null;
+
+  const phasesIncluded = Object.keys(phaseSummary).sort();
+  const fieldCount = Object.values(parsedData).filter(months =>
+    Object.values(months).some(v => v !== null)
+  ).length;
+
+  const payload = {
+    country: country,
+    entity_type: entityType,
+    data_json: parsedData,
+    upload_method: 'spreadsheet',
+    phases_included: phasesIncluded,
+    field_count: fieldCount,
+  };
+
+  try {
+    const resp = await fetch(`${SUPABASE_URL}/rest/v1/raw_submissions`, {
+      method: 'POST',
+      headers: {
+        'apikey': ANON_KEY,
+        'Authorization': `Bearer ${ANON_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=representation'
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (!resp.ok) {
+      const errText = await resp.text();
+      throw new Error(`Server returned ${resp.status}: ${errText}`);
+    }
+
+    const result = await resp.json();
+    const token = result[0]?.session_token || 'unknown';
+
+    document.getElementById('tokenDisplay').textContent = `Session token: ${token} (save this if you need to reference your submission)`;
+    setStep(4);
+
+  } catch (err) {
+    errorEl.textContent = 'Submission failed: ' + err.message;
+    errorEl.classList.remove('hidden');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = 'Submit Data';
+  }
+}
+</script>
+</body>
+</html>
