@@ -155,7 +155,13 @@ input[type="file"] { display: none; }
   <!-- STEP 3: Confirm & Submit -->
   <div id="step3" class="card hidden">
     <h2>Company Profile &amp; Submit</h2>
-    <p>Optional: provide your entity details for disaggregated reporting. Your submission remains anonymous.</p>
+    <p>Enter the company code assigned by TRMA and your entity details. Individual company data is never shared with other participants.</p>
+
+    <div style="margin-bottom:20px">
+      <label for="companyCode" style="font-size:13px;font-weight:600;color:#1B3A5C;display:block;margin-bottom:4px">Company Code <span style="color:#dc3545">*</span></label>
+      <input type="text" id="companyCode" placeholder="e.g. TRMA-001" style="width:100%;max-width:260px;padding:9px 14px;border:1px solid #dee2e6;border-radius:6px;font-size:15px;font-family:'SF Mono','Consolas',monospace;letter-spacing:0.5px">
+      <div style="font-size:12px;color:#6c757d;margin-top:4px">Enter the code provided to you by the TRMA Executive Director.</div>
+    </div>
 
     <div class="profile-fields">
       <div>
@@ -179,7 +185,7 @@ input[type="file"] { display: none; }
     </div>
 
     <div class="alert alert-info">
-      Your data will be submitted anonymously with a random session token. No company name is stored.
+      Your company code is visible only to TRMA administration. Benchmark reports show aggregated data only — no individual company data is ever shared with other participants.
     </div>
 
     <div id="submitError" class="alert alert-error hidden"></div>
@@ -513,6 +519,17 @@ async function submitData() {
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span> Submitting...';
 
+  const companyCode = document.getElementById('companyCode').value.trim();
+  if (!companyCode) {
+    errorEl.textContent = 'Company code is required. Enter the code provided by the TRMA Executive Director.';
+    errorEl.classList.remove('hidden');
+    btn.disabled = false;
+    btn.innerHTML = 'Submit Data';
+    document.getElementById('companyCode').style.borderColor = '#dc3545';
+    return;
+  }
+  document.getElementById('companyCode').style.borderColor = '#dee2e6';
+
   const country = document.getElementById('country').value || null;
   const entityType = document.getElementById('entityType').value || null;
 
@@ -522,6 +539,7 @@ async function submitData() {
   ).length;
 
   const payload = {
+    company_code: companyCode,
     country: country,
     entity_type: entityType,
     data_json: parsedData,

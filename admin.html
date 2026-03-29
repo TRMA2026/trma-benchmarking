@@ -132,6 +132,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
           <tr>
             <th>#</th>
             <th>Submitted</th>
+            <th>Company Code</th>
             <th>Method</th>
             <th>Country</th>
             <th>Entity Type</th>
@@ -142,7 +143,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
           </tr>
         </thead>
         <tbody id="tableBody">
-          <tr><td colspan="9" style="text-align:center;padding:40px;color:#aaa">Loading...</td></tr>
+          <tr><td colspan="10" style="text-align:center;padding:40px;color:#aaa">Loading...</td></tr>
         </tbody>
       </table>
     </div>
@@ -204,7 +205,7 @@ function logout() {
 // ============================================================
 async function loadSubmissions() {
   const tbody = document.getElementById('tableBody');
-  tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:40px;color:#aaa">Loading...</td></tr>';
+  tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:40px;color:#aaa">Loading...</td></tr>';
 
   try {
     const resp = await fetch(`${SUPABASE_URL}/rest/v1/raw_submissions?select=*&order=submitted_at.desc`, {
@@ -214,7 +215,7 @@ async function loadSubmissions() {
     allSubmissions = await resp.json();
     renderDashboard();
   } catch (err) {
-    tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:40px;color:#c00">Error loading: ${err.message}</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;padding:40px;color:#c00">Error loading: ${err.message}</td></tr>`;
   }
 }
 
@@ -245,7 +246,7 @@ function renderDashboard() {
   // Table
   const tbody = document.getElementById('tableBody');
   if (totalSubs === 0) {
-    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:40px;color:#aaa">No submissions yet.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:40px;color:#aaa">No submissions yet.</td></tr>';
     return;
   }
 
@@ -265,6 +266,7 @@ function renderDashboard() {
     return `<tr>
       <td style="color:var(--muted);font-size:12px">${totalSubs - i}</td>
       <td>${dateStr}<br><span style="font-size:11px;color:var(--muted)">${timeStr}</span></td>
+      <td style="font-weight:600;color:var(--navy)">${s.company_code || '<span style="color:#ccc">—</span>'}</td>
       <td>${methodBadge}</td>
       <td>${s.country || '<span style="color:#ccc">—</span>'}</td>
       <td>${s.entity_type || '<span style="color:#ccc">—</span>'}</td>
@@ -337,6 +339,7 @@ function showDetail(index) {
         <h2>Submission Detail</h2>
         <div class="modal-meta">
           ${dateStr} &middot;
+          <strong>${s.company_code || 'No company code'}</strong> &middot;
           ${s.upload_method === 'spreadsheet' ? 'Spreadsheet Upload' : 'Web Form'} &middot;
           ${s.country || 'No country'} &middot;
           ${s.entity_type || 'No entity type'} &middot;
@@ -366,7 +369,7 @@ function exportCSV() {
   const sortedRefs = [...allRefs].sort((a, b) => parseFloat(a) - parseFloat(b));
 
   // Build CSV header
-  const headers = ['submission_id', 'session_token', 'submitted_at', 'upload_method', 'country', 'entity_type', 'phases', 'field_count'];
+  const headers = ['submission_id', 'session_token', 'company_code', 'submitted_at', 'upload_method', 'country', 'entity_type', 'phases', 'field_count'];
   // Add ref_code columns for each month
   for (const ref of sortedRefs) {
     for (const month of MONTHS) {
@@ -381,6 +384,7 @@ function exportCSV() {
     const row = [
       s.id,
       s.session_token,
+      s.company_code || '',
       s.submitted_at,
       s.upload_method,
       s.country || '',
