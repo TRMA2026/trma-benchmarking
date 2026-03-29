@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TRMA Benchmarking — Admin</title>
+<style>
+:root {
+  --navy: #1B3A5C;
+  --blue: #2176BC;
+  --light-blue: #E8F0FE;
+  --green: #28a745;
+  --amber: #f0ad4e;
+  --red: #dc3545;
+  --bg: #f8f9fa;
+  --card: #ffffff;
+  --text: #333333;
+  --muted: #6c757d;
+  --border: #dee2e6;
+  --radius: 8px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+
+.header { background: var(--navy); color: #fff; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+.header h1 { font-size: 20px; font-weight: 600; }
+.header-links { display: flex; gap: 16px; }
+.header-links a { color: #a8c8e8; text-decoration: none; font-size: 14px; }
+.header-links a:hover { color: #fff; }
+
+.container { max-width: 1100px; margin: 0 auto; padding: 24px; }
+
+.card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; margin-bottom: 20px; }
+
+/* Login */
+.login-wrapper { max-width: 400px; margin: 80px auto; }
+.login-wrapper h2 { color: var(--navy); margin-bottom: 16px; text-align: center; }
+.login-input { width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: 6px; font-size: 15px; margin-bottom: 12px; }
+.login-input:focus { outline: none; border-color: var(--blue); }
+
+/* Summary cards */
+.summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 24px; }
+.summary-item { background: var(--light-blue); border-radius: var(--radius); padding: 16px; text-align: center; }
+.summary-item .count { font-size: 30px; font-weight: 700; color: var(--navy); }
+.summary-item .label { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+/* Table */
+.data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.data-table th { background: var(--navy); color: #fff; padding: 10px 12px; text-align: left; font-weight: 500; font-size: 12px; text-transform: uppercase; letter-spacing: 0.3px; position: sticky; top: 0; }
+.data-table td { padding: 8px 12px; border-bottom: 1px solid #f0f0f0; vertical-align: top; }
+.data-table tr:nth-child(even) { background: #fafbfc; }
+.data-table tr:hover { background: var(--light-blue); }
+.data-table td.mono { font-family: 'SF Mono', 'Consolas', monospace; font-size: 11px; color: var(--muted); }
+
+.badge { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 500; }
+.badge-green { background: #e8f5e9; color: #2e7d32; }
+.badge-amber { background: #fff3e0; color: #e65100; }
+.badge-gray { background: #f5f5f5; color: #999; }
+.badge-blue { background: var(--light-blue); color: var(--navy); }
+
+.btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 18px; border: none; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.15s; }
+.btn-primary { background: var(--blue); color: #fff; }
+.btn-primary:hover { background: #1a65a3; }
+.btn-secondary { background: #fff; color: var(--navy); border: 1px solid var(--border); }
+.btn-secondary:hover { background: #f8f9fa; }
+.btn-sm { padding: 4px 10px; font-size: 12px; }
+.btn-danger { background: #fff; color: var(--red); border: 1px solid var(--red); }
+.btn-danger:hover { background: #fdecea; }
+
+.toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px; }
+.toolbar h2 { font-size: 18px; color: var(--navy); }
+.toolbar-actions { display: flex; gap: 8px; }
+
+.alert { padding: 12px 16px; border-radius: var(--radius); font-size: 14px; margin-bottom: 16px; }
+.alert-error { background: #fdecea; color: #b71c1c; border: 1px solid #f5c6cb; }
+
+/* Detail modal */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 100; display: flex; align-items: center; justify-content: center; }
+.modal { background: #fff; border-radius: 12px; width: 90%; max-width: 900px; max-height: 85vh; overflow-y: auto; padding: 24px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+.modal h2 { color: var(--navy); margin-bottom: 4px; font-size: 18px; }
+.modal-meta { font-size: 13px; color: var(--muted); margin-bottom: 16px; }
+.modal-close { position: absolute; top: 16px; right: 20px; background: none; border: none; font-size: 24px; cursor: pointer; color: var(--muted); }
+.modal-phase { margin-bottom: 16px; }
+.modal-phase h3 { font-size: 14px; color: var(--navy); padding: 8px 12px; background: var(--light-blue); border-radius: 6px 6px 0 0; margin-bottom: 0; }
+.modal-phase table { width: 100%; border-collapse: collapse; }
+.modal-phase td, .modal-phase th { padding: 4px 10px; font-size: 12px; border-bottom: 1px solid #f0f0f0; }
+.modal-phase th { text-align: left; font-weight: 500; color: var(--muted); text-transform: uppercase; font-size: 10px; background: #fafbfc; }
+.modal-phase td.has-data { color: var(--navy); font-weight: 500; }
+.modal-phase td.empty { color: #ddd; }
+
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>TRMA Benchmarking — Admin Portal</h1>
+  <div class="header-links">
+    <a href="index.html">Dashboard</a>
+    <a href="upload.html">Upload Page</a>
+    <a href="#" onclick="logout()" id="logoutLink" class="hidden">Logout</a>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- LOGIN -->
+  <div id="loginView" class="login-wrapper">
+    <div class="card">
+      <h2>Admin Login</h2>
+      <input type="password" class="login-input" id="pwInput" placeholder="Enter admin password" onkeydown="if(event.key==='Enter')doLogin()">
+      <button class="btn btn-primary" style="width:100%" onclick="doLogin()">Login</button>
+      <div id="loginError" class="alert alert-error hidden" style="margin-top:12px"></div>
+    </div>
+  </div>
+
+  <!-- ADMIN DASHBOARD -->
+  <div id="adminView" class="hidden">
+    <div class="summary-grid" id="summaryGrid"></div>
+
+    <div class="toolbar">
+      <h2>All Submissions</h2>
+      <div class="toolbar-actions">
+        <button class="btn btn-secondary" onclick="loadSubmissions()">↻ Refresh</button>
+        <button class="btn btn-primary" onclick="exportCSV()">Export CSV</button>
+      </div>
+    </div>
+
+    <div class="card" style="padding:0;overflow-x:auto">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Submitted</th>
+            <th>Method</th>
+            <th>Country</th>
+            <th>Entity Type</th>
+            <th>Phases</th>
+            <th>Fields</th>
+            <th>Session Token</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          <tr><td colspan="9" style="text-align:center;padding:40px;color:#aaa">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- DETAIL MODAL (injected dynamically) -->
+<div id="modalContainer"></div>
+
+<script>
+const SUPABASE_URL = 'https://hktzvlkrimpfreeoehsi.supabase.co';
+const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhrdHp2bGtyaW1wZnJlZW9laHNpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MjQwNTEsImV4cCI6MjA5MDIwMDA1MX0.1bYxe1z-BFw4N9kvORaBsvGBVZfsw_cSOiOzsOnr3g0';
+const ADMIN_PW = 'trajectory-2026!';
+
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const PHASE_NAMES = { A:'Acquisition & Retention', B:'Decision', C:'Payments', D:'Accounts Receivable', E:'Write-Off', F:'Recovery' };
+
+// Ref code → phase mapping based on number ranges
+function refToPhase(ref) {
+  const num = parseFloat(ref);
+  if (num >= 1 && num < 20) return 'A';
+  if (num >= 20 && num < 30) return 'B';
+  if (num >= 30 && num < 40) return 'C';
+  if (num >= 40 && num < 49) return 'D';
+  if (num >= 49 && num < 55) return 'E';
+  if (num >= 60 && num < 70) return 'F';
+  return null;
+}
+
+let allSubmissions = [];
+
+// ============================================================
+// AUTH
+// ============================================================
+function doLogin() {
+  const pw = document.getElementById('pwInput').value;
+  if (pw === ADMIN_PW) {
+    document.getElementById('loginView').classList.add('hidden');
+    document.getElementById('adminView').classList.remove('hidden');
+    document.getElementById('logoutLink').classList.remove('hidden');
+    loadSubmissions();
+  } else {
+    const err = document.getElementById('loginError');
+    err.textContent = 'Incorrect password.';
+    err.classList.remove('hidden');
+  }
+}
+
+function logout() {
+  document.getElementById('loginView').classList.remove('hidden');
+  document.getElementById('adminView').classList.add('hidden');
+  document.getElementById('logoutLink').classList.add('hidden');
+  document.getElementById('pwInput').value = '';
+}
+
+// ============================================================
+// LOAD DATA
+// ============================================================
+async function loadSubmissions() {
+  const tbody = document.getElementById('tableBody');
+  tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:40px;color:#aaa">Loading...</td></tr>';
+
+  try {
+    const resp = await fetch(`${SUPABASE_URL}/rest/v1/raw_submissions?select=*&order=submitted_at.desc`, {
+      headers: { 'apikey': ANON_KEY, 'Authorization': `Bearer ${ANON_KEY}` }
+    });
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    allSubmissions = await resp.json();
+    renderDashboard();
+  } catch (err) {
+    tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:40px;color:#c00">Error loading: ${err.message}</td></tr>`;
+  }
+}
+
+// ============================================================
+// RENDER
+// ============================================================
+function renderDashboard() {
+  // Summary cards
+  const grid = document.getElementById('summaryGrid');
+  const totalSubs = allSubmissions.length;
+  const spreadsheet = allSubmissions.filter(s => s.upload_method === 'spreadsheet').length;
+  const webform = allSubmissions.filter(s => s.upload_method === 'web_form').length;
+  const totalFields = allSubmissions.reduce((sum, s) => sum + (s.field_count || 0), 0);
+  const avgFields = totalSubs > 0 ? Math.round(totalFields / totalSubs) : 0;
+
+  // Count unique phases across all submissions
+  const allPhases = new Set();
+  allSubmissions.forEach(s => (s.phases_included || []).forEach(p => allPhases.add(p)));
+
+  grid.innerHTML = `
+    <div class="summary-item"><div class="count">${totalSubs}</div><div class="label">Total Submissions</div></div>
+    <div class="summary-item"><div class="count">${spreadsheet}</div><div class="label">Spreadsheet Uploads</div></div>
+    <div class="summary-item"><div class="count">${webform}</div><div class="label">Web Form Entries</div></div>
+    <div class="summary-item"><div class="count">${allPhases.size}</div><div class="label">Phases Covered</div></div>
+    <div class="summary-item"><div class="count">${avgFields}</div><div class="label">Avg Fields / Submission</div></div>
+  `;
+
+  // Table
+  const tbody = document.getElementById('tableBody');
+  if (totalSubs === 0) {
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:40px;color:#aaa">No submissions yet.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = allSubmissions.map((s, i) => {
+    const date = new Date(s.submitted_at);
+    const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    const timeStr = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+    const phases = (s.phases_included || []).join(', ') || '—';
+    const methodBadge = s.upload_method === 'spreadsheet'
+      ? '<span class="badge badge-blue">Spreadsheet</span>'
+      : '<span class="badge badge-green">Web Form</span>';
+
+    const phaseBadges = (s.phases_included || []).map(p =>
+      `<span class="badge badge-blue" style="margin-right:2px">${p}</span>`
+    ).join('') || '<span class="badge badge-gray">None</span>';
+
+    return `<tr>
+      <td style="color:var(--muted);font-size:12px">${totalSubs - i}</td>
+      <td>${dateStr}<br><span style="font-size:11px;color:var(--muted)">${timeStr}</span></td>
+      <td>${methodBadge}</td>
+      <td>${s.country || '<span style="color:#ccc">—</span>'}</td>
+      <td>${s.entity_type || '<span style="color:#ccc">—</span>'}</td>
+      <td>${phaseBadges}</td>
+      <td style="text-align:center;font-weight:500;color:var(--navy)">${s.field_count || 0}</td>
+      <td class="mono">${(s.session_token || '').substring(0, 12)}…</td>
+      <td><button class="btn btn-sm btn-secondary" onclick="showDetail(${i})">View</button></td>
+    </tr>`;
+  }).join('');
+}
+
+// ============================================================
+// DETAIL MODAL
+// ============================================================
+function showDetail(index) {
+  const s = allSubmissions[index];
+  const data = s.data_json || {};
+  const refs = Object.keys(data).sort((a, b) => parseFloat(a) - parseFloat(b));
+
+  // Group by phase
+  const byPhase = {};
+  for (const ref of refs) {
+    const phase = refToPhase(ref) || '?';
+    if (!byPhase[phase]) byPhase[phase] = [];
+    byPhase[phase].push(ref);
+  }
+
+  const date = new Date(s.submitted_at);
+  const dateStr = date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' });
+
+  let phasesHTML = '';
+  for (const phase of ['A','B','C','D','E','F']) {
+    const phaseRefs = byPhase[phase];
+    if (!phaseRefs || phaseRefs.length === 0) continue;
+
+    let rows = '';
+    for (const ref of phaseRefs) {
+      const months = data[ref] || {};
+      const monthCells = MONTHS.map(m => {
+        const v = months[m];
+        if (v === null || v === undefined) return '<td class="empty">—</td>';
+        if (v === 'NA') return '<td style="color:#999">NA</td>';
+        return `<td class="has-data">${typeof v === 'number' ? v.toLocaleString() : v}</td>`;
+      }).join('');
+      rows += `<tr><td style="font-weight:500;color:var(--muted)">${ref}</td>${monthCells}</tr>`;
+    }
+
+    const filledCount = phaseRefs.filter(ref => {
+      const months = data[ref] || {};
+      return Object.values(months).some(v => v !== null && v !== undefined && v !== 'NA');
+    }).length;
+
+    phasesHTML += `
+      <div class="modal-phase">
+        <h3>Phase ${phase}: ${PHASE_NAMES[phase] || 'Unknown'} — ${filledCount}/${phaseRefs.length} fields with data</h3>
+        <div style="overflow-x:auto">
+          <table>
+            <thead><tr><th>Ref</th>${MONTHS.map(m => `<th>${m.substring(0,3)}</th>`).join('')}</tr></thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  }
+
+  document.getElementById('modalContainer').innerHTML = `
+    <div class="modal-overlay" onclick="if(event.target===this)closeModal()">
+      <div class="modal" style="position:relative">
+        <button onclick="closeModal()" style="position:absolute;top:12px;right:16px;background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted)">&times;</button>
+        <h2>Submission Detail</h2>
+        <div class="modal-meta">
+          ${dateStr} &middot;
+          ${s.upload_method === 'spreadsheet' ? 'Spreadsheet Upload' : 'Web Form'} &middot;
+          ${s.country || 'No country'} &middot;
+          ${s.entity_type || 'No entity type'} &middot;
+          Token: <code>${s.session_token || '—'}</code>
+        </div>
+        ${phasesHTML || '<p style="color:#aaa;padding:20px 0">No data found in this submission.</p>'}
+      </div>
+    </div>
+  `;
+}
+
+function closeModal() {
+  document.getElementById('modalContainer').innerHTML = '';
+}
+
+// ============================================================
+// CSV EXPORT
+// ============================================================
+function exportCSV() {
+  if (allSubmissions.length === 0) { alert('No submissions to export.'); return; }
+
+  // Collect all unique ref codes across all submissions
+  const allRefs = new Set();
+  allSubmissions.forEach(s => {
+    Object.keys(s.data_json || {}).forEach(ref => allRefs.add(ref));
+  });
+  const sortedRefs = [...allRefs].sort((a, b) => parseFloat(a) - parseFloat(b));
+
+  // Build CSV header
+  const headers = ['submission_id', 'session_token', 'submitted_at', 'upload_method', 'country', 'entity_type', 'phases', 'field_count'];
+  // Add ref_code columns for each month
+  for (const ref of sortedRefs) {
+    for (const month of MONTHS) {
+      headers.push(`${ref}_${month.substring(0,3)}`);
+    }
+  }
+
+  // Build rows
+  const rows = [headers.join(',')];
+  for (const s of allSubmissions) {
+    const data = s.data_json || {};
+    const row = [
+      s.id,
+      s.session_token,
+      s.submitted_at,
+      s.upload_method,
+      s.country || '',
+      s.entity_type || '',
+      (s.phases_included || []).join(';'),
+      s.field_count || 0
+    ];
+    for (const ref of sortedRefs) {
+      const months = data[ref] || {};
+      for (const month of MONTHS) {
+        const v = months[month];
+        if (v === null || v === undefined) row.push('');
+        else if (v === 'NA') row.push('NA');
+        else row.push(v);
+      }
+    }
+    rows.push(row.map(v => {
+      const str = String(v);
+      return str.includes(',') || str.includes('"') ? `"${str.replace(/"/g, '""')}"` : str;
+    }).join(','));
+  }
+
+  // Download
+  const blob = new Blob([rows.join('\n')], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `trma_benchmarking_export_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// Close modal on Escape
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+</script>
+</body>
+</html>
