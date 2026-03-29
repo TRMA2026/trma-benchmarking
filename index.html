@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TRMA Benchmarking Portal</title>
+<style>
+:root {
+  --navy: #1B3A5C;
+  --blue: #2176BC;
+  --light-blue: #E8F0FE;
+  --green: #28a745;
+  --bg: #f8f9fa;
+  --card: #ffffff;
+  --text: #333333;
+  --muted: #6c757d;
+  --border: #dee2e6;
+  --radius: 10px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; min-height: 100vh; }
+
+.hero { background: linear-gradient(135deg, var(--navy) 0%, #2a5a8c 100%); color: #fff; padding: 48px 24px 40px; text-align: center; }
+.hero h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.3px; }
+.hero p { font-size: 16px; color: #b8d4f0; max-width: 600px; margin: 0 auto; }
+.hero .tagline { font-size: 13px; color: #7aabda; margin-top: 12px; letter-spacing: 1px; text-transform: uppercase; }
+
+.container { max-width: 900px; margin: 0 auto; padding: 32px 24px; }
+
+.cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-top: -40px; position: relative; z-index: 1; }
+@media (max-width: 600px) { .cards { grid-template-columns: 1fr; } }
+
+.card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px 24px; text-align: center; transition: all 0.2s; text-decoration: none; color: var(--text); display: flex; flex-direction: column; align-items: center; }
+.card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.08); border-color: var(--blue); }
+
+.card-icon { width: 56px; height: 56px; border-radius: 14px; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; }
+.card-icon svg { width: 28px; height: 28px; }
+.card-icon.blue { background: var(--light-blue); color: var(--blue); }
+.card-icon.green { background: #e8f5e9; color: var(--green); }
+.card-icon.navy { background: #e3eaf2; color: var(--navy); }
+
+.card h2 { font-size: 17px; color: var(--navy); margin-bottom: 6px; font-weight: 600; }
+.card p { font-size: 13px; color: var(--muted); line-height: 1.5; flex: 1; }
+.card .arrow { margin-top: 14px; font-size: 13px; color: var(--blue); font-weight: 500; }
+
+.info-section { margin-top: 40px; }
+.info-section h3 { font-size: 16px; color: var(--navy); margin-bottom: 12px; }
+
+.phases { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; }
+.phase-chip { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 12px 10px; text-align: center; }
+.phase-chip .code { font-size: 20px; font-weight: 700; color: var(--blue); }
+.phase-chip .name { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+.footer { text-align: center; padding: 32px 24px; color: var(--muted); font-size: 12px; }
+.footer a { color: var(--blue); text-decoration: none; }
+
+.template-bar { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 24px; margin-top: 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+.template-bar .info { font-size: 14px; color: var(--text); }
+.template-bar .info span { color: var(--muted); font-size: 13px; }
+.btn { display: inline-flex; align-items: center; gap: 6px; padding: 9px 20px; border: none; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; text-decoration: none; transition: all 0.15s; }
+.btn-primary { background: var(--blue); color: #fff; }
+.btn-primary:hover { background: #1a65a3; }
+.btn-outline { background: #fff; color: var(--navy); border: 1px solid var(--border); }
+.btn-outline:hover { background: #f8f9fa; }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="tagline">Telecommunications Risk Management Association</div>
+  <h1>TRMA Benchmarking Portal</h1>
+  <p>Enter your operational data, benchmark against industry peers, and access aggregated reports — all anonymously.</p>
+</div>
+
+<div class="container">
+
+  <div class="cards">
+    <!-- Upload Data -->
+    <a href="upload.html" class="card">
+      <div class="card-icon green">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
+        </svg>
+      </div>
+      <h2>Upload Data</h2>
+      <p>Upload your completed Excel template. Your data is parsed in-browser and submitted anonymously.</p>
+      <span class="arrow">Upload spreadsheet →</span>
+    </a>
+
+    <!-- Manual Entry -->
+    <a href="survey.html" class="card">
+      <div class="card-icon" style="background:#fff3e0;color:#e65100;">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zM16.862 4.487L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"/>
+        </svg>
+      </div>
+      <h2>Enter Data Online</h2>
+      <p>Fill in your benchmarking data directly on the web form — no spreadsheet needed. Currently covers Phase A.</p>
+      <span class="arrow">Start data entry →</span>
+    </a>
+
+    <!-- View Reports -->
+    <a href="survey.html#report" class="card">
+      <div class="card-icon blue">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/>
+        </svg>
+      </div>
+      <h2>View Reports</h2>
+      <p>View aggregated benchmarks, peer comparisons, and trend data across all submitted metrics.</p>
+      <span class="arrow">View benchmarks →</span>
+    </a>
+
+    <!-- Admin -->
+    <a href="admin.html" class="card">
+      <div class="card-icon navy">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+        </svg>
+      </div>
+      <h2>Admin Portal</h2>
+      <p>View all submissions, inspect individual records, export data to CSV. Password required.</p>
+      <span class="arrow">Admin login →</span>
+    </a>
+  </div>
+
+  <!-- Template download -->
+  <div class="template-bar">
+    <div class="info">
+      <strong>Download the Data Entry Template</strong><br>
+      <span>Excel file with all 6 phases — fill in your data, then upload above.</span>
+    </div>
+    <a href="TRMA_Rapid_Survey_Template.xlsx" download class="btn btn-primary">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
+      Download Template
+    </a>
+  </div>
+
+  <!-- Phases overview -->
+  <div class="info-section">
+    <h3>Survey Phases</h3>
+    <div class="phases">
+      <div class="phase-chip"><div class="code">A</div><div class="name">Acquisition &amp; Retention</div></div>
+      <div class="phase-chip"><div class="code">B</div><div class="name">Decision</div></div>
+      <div class="phase-chip"><div class="code">C</div><div class="name">Payments</div></div>
+      <div class="phase-chip"><div class="code">D</div><div class="name">Accounts Receivable</div></div>
+      <div class="phase-chip"><div class="code">E</div><div class="name">Write-Off</div></div>
+      <div class="phase-chip"><div class="code">F</div><div class="name">Recovery</div></div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  &copy; 2026 Telecommunications Risk Management Association &middot; <a href="https://www.trma.org" target="_blank">trma.org</a><br>
+  Submissions are anonymous — no company names are stored.
+</div>
+
+</body>
+</html>
