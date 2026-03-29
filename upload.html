@@ -198,10 +198,19 @@ input[type="file"] { display: none; }
       </svg>
       <h2>Submission Complete!</h2>
       <p>Your benchmarking data has been received. It will be combined with other members' submissions to generate industry benchmarks.</p>
-      <p style="margin-top:12px;font-size:13px;color:#999" id="tokenDisplay"></p>
+
+      <div style="background:#e8f5e9;border:1px solid #c8e6c9;border-radius:8px;padding:16px 20px;margin:20px auto;max-width:500px;text-align:left">
+        <div style="font-size:13px;font-weight:600;color:#2e7d32;margin-bottom:6px">Your Report Access Token</div>
+        <div style="font-size:12px;color:#555;margin-bottom:10px">Save this token — you'll need it to access benchmark reports. It is your only key to view results.</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input type="text" id="tokenValue" readonly style="flex:1;padding:8px 12px;border:1px solid #c8e6c9;border-radius:6px;font-family:'SF Mono','Consolas',monospace;font-size:13px;background:#fff;color:#1B3A5C;letter-spacing:0.5px">
+          <button onclick="copyToken()" id="copyBtn" style="padding:8px 14px;border:1px solid #c8e6c9;border-radius:6px;background:#fff;cursor:pointer;font-size:12px;font-weight:500;color:#2e7d32;white-space:nowrap">Copy</button>
+        </div>
+      </div>
+
       <div class="actions" style="justify-content:center;margin-top:24px">
-        <button class="btn btn-primary" onclick="window.location.href='index.html'">Return to Dashboard</button>
-        <button class="btn btn-secondary" onclick="resetUpload()">Upload Another</button>
+        <button class="btn btn-primary" id="viewReportsBtn" onclick="goToReports()">View Reports</button>
+        <button class="btn btn-secondary" onclick="window.location.href='index.html'">Return to Portal</button>
       </div>
     </div>
   </div>
@@ -541,7 +550,8 @@ async function submitData() {
     const result = await resp.json();
     const token = result[0]?.session_token || 'unknown';
 
-    document.getElementById('tokenDisplay').textContent = `Session token: ${token} (save this if you need to reference your submission)`;
+    document.getElementById('tokenValue').value = token;
+    window._submissionToken = token;
     setStep(4);
 
   } catch (err) {
@@ -551,6 +561,21 @@ async function submitData() {
     btn.disabled = false;
     btn.innerHTML = 'Submit Data';
   }
+}
+
+function copyToken() {
+  const input = document.getElementById('tokenValue');
+  input.select();
+  navigator.clipboard.writeText(input.value).then(() => {
+    const btn = document.getElementById('copyBtn');
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy', 2000);
+  });
+}
+
+function goToReports() {
+  const token = window._submissionToken || document.getElementById('tokenValue').value;
+  window.location.href = `reports.html?token=${encodeURIComponent(token)}`;
 }
 </script>
 </body>
