@@ -228,17 +228,17 @@ async function validateToken() {
   showError('');
 
   try {
-    // 1. Verify token exists in raw_submissions
-    const match = await sbFetch(`raw_submissions?session_token=eq.${encodeURIComponent(token)}&select=id,session_token,submitted_at&limit=1`);
-    if (!match || match.length === 0) {
+    // 1. Pull all submissions first (we need them for count + data)
+    const all = await sbFetch(`raw_submissions?select=session_token,field_id,field_value,reporting_month,phase`);
+    allSubmissions = all || [];
+
+    // 2. Verify token exists
+    const match = allSubmissions.find(r => r.session_token === token);
+    if (!match) {
       showError('Token not found. Please check and try again.');
       return;
     }
     validToken = token;
-
-    // 2. Count total unique submissions (by session_token)
-    const all = await sbFetch(`raw_submissions?select=session_token,field_id,field_value,reporting_month,phase`);
-    allSubmissions = all || [];
 
     const uniqueTokens = new Set(all.map(r => r.session_token));
     const submissionCount = uniqueTokens.size;
