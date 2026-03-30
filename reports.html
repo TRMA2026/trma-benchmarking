@@ -228,9 +228,11 @@ async function validateToken() {
   showError('');
 
   try {
-    // 1. Pull all submissions first (we need them for count + data)
-    const all = await sbFetch(`raw_submissions?select=session_token,field_id,field_value,reporting_month,phase`);
+    // Pull all submissions - select all columns since we'll work with what's there
+    const all = await sbFetch(`raw_submissions?select=*&limit=500`);
     allSubmissions = all || [];
+    console.log('raw_submissions sample row:', allSubmissions[0]);
+    console.log('Total rows:', allSubmissions.length);
 
     // 2. Verify token exists
     const match = allSubmissions.find(r => r.session_token === token);
