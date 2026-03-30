@@ -28,101 +28,126 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
 .header a:hover { color: #fff; }
 
 .container { max-width: 1000px; margin: 0 auto; padding: 24px; }
-
 .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; margin-bottom: 20px; }
 
 /* Token gate */
 .gate-wrapper { max-width: 480px; margin: 60px auto; }
 .gate-wrapper h2 { color: var(--navy); margin-bottom: 8px; text-align: center; font-size: 22px; }
-.gate-wrapper .subtitle { text-align: center; color: var(--muted); font-size: 14px; margin-bottom: 24px; }
+.gate-subtitle { text-align: center; color: var(--muted); font-size: 14px; margin-bottom: 24px; }
 .gate-input-row { display: flex; gap: 8px; }
-.gate-input { flex: 1; padding: 11px 14px; border: 1px solid var(--border); border-radius: 6px; font-size: 15px; font-family: 'SF Mono', 'Consolas', monospace; letter-spacing: 0.5px; }
-.gate-input:focus { outline: none; border-color: var(--blue); }
-.gate-input.error { border-color: var(--red); }
+.gate-input-row input { flex: 1; padding: 10px 14px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 15px; font-family: monospace; }
+.gate-input-row input:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(33,118,188,0.15); }
+.gate-error { color: var(--red); font-size: 13px; margin-top: 8px; min-height: 20px; }
 
-.btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 22px; border: none; border-radius: 6px; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.15s; }
+/* Threshold / pending screen */
+.pending-wrapper { max-width: 560px; margin: 60px auto; text-align: center; }
+.pending-icon { font-size: 56px; margin-bottom: 16px; }
+.pending-wrapper h2 { color: var(--navy); font-size: 22px; margin-bottom: 10px; }
+.pending-wrapper p { color: var(--muted); font-size: 15px; margin-bottom: 24px; line-height: 1.7; }
+
+.progress-bar-wrap { background: #e9ecef; border-radius: 99px; height: 18px; overflow: hidden; margin: 0 auto 10px; max-width: 380px; }
+.progress-bar-fill { background: linear-gradient(90deg, var(--blue), #1a5fa8); height: 100%; border-radius: 99px; transition: width 0.5s ease; }
+.progress-label { font-size: 15px; font-weight: 600; color: var(--navy); margin-bottom: 4px; }
+.progress-sub { font-size: 13px; color: var(--muted); margin-bottom: 28px; }
+
+.pending-note { background: var(--light-blue); border: 1px solid #b8d4ef; border-radius: var(--radius); padding: 14px 18px; font-size: 13px; color: var(--navy); text-align: left; line-height: 1.6; }
+.pending-note strong { display: block; margin-bottom: 4px; }
+
+/* Buttons */
+.btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px; border-radius: var(--radius); border: none; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; text-decoration: none; }
 .btn-primary { background: var(--blue); color: #fff; }
-.btn-primary:hover { background: #1a65a3; }
-.btn-primary:disabled { background: #a0c4e8; cursor: not-allowed; }
+.btn-primary:hover { background: #1a5fa8; }
 .btn-secondary { background: #fff; color: var(--navy); border: 1px solid var(--border); }
-.btn-secondary:hover { background: #f8f9fa; }
+.btn-secondary:hover { background: var(--bg); }
 
-.alert { padding: 12px 16px; border-radius: var(--radius); font-size: 14px; margin-top: 12px; }
-.alert-error { background: #fdecea; color: #b71c1c; border: 1px solid #f5c6cb; }
-.alert-info { background: var(--light-blue); color: var(--navy); border: 1px solid #b8d4f0; }
+/* Reports view */
+.report-header { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; }
+.report-header h2 { color: var(--navy); font-size: 20px; }
+.report-meta { font-size: 13px; color: var(--muted); margin-top: 4px; }
 
-.spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid #fff; border-top-color: transparent; border-radius: 50%; animation: spin 0.6s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
+.summary-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; margin-bottom: 24px; }
+.summary-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; text-align: center; }
+.summary-card .val { font-size: 28px; font-weight: 700; color: var(--blue); }
+.summary-card .lbl { font-size: 12px; color: var(--muted); margin-top: 4px; }
 
-/* Report styles */
-.report-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
-.report-header h2 { font-size: 20px; color: var(--navy); }
-.report-meta { font-size: 13px; color: var(--muted); }
+.month-selector { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+.month-selector label { font-weight: 600; color: var(--navy); font-size: 14px; }
+.month-selector select { padding: 6px 12px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 14px; }
 
-.summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 24px; }
-.summary-item { background: var(--light-blue); border-radius: var(--radius); padding: 14px; text-align: center; }
-.summary-item .count { font-size: 28px; font-weight: 700; color: var(--navy); }
-.summary-item .label { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.phase-tabs { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: -1px; }
+.phase-tab { padding: 8px 16px; background: #fff; border: 1px solid var(--border); border-bottom: none; border-radius: 6px 6px 0 0; font-size: 13px; font-weight: 600; cursor: pointer; color: var(--muted); transition: all 0.15s; }
+.phase-tab.active { background: #fff; color: var(--blue); border-bottom: 2px solid #fff; margin-bottom: -2px; }
+.phase-tab:hover:not(.active) { background: var(--light-blue); }
 
-/* Phase tabs */
-.phase-tabs { display: flex; gap: 0; margin-bottom: 0; border-bottom: 2px solid var(--border); }
-.phase-tab { padding: 10px 20px; font-size: 13px; font-weight: 500; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.15s; user-select: none; }
-.phase-tab:hover { color: var(--navy); background: #fafbfc; }
-.phase-tab.active { color: var(--blue); border-bottom-color: var(--blue); }
-
-/* Metric table */
-.metric-section { margin-top: 20px; }
-.metric-group { margin-bottom: 20px; }
-.metric-group h3 { font-size: 14px; color: var(--navy); padding: 8px 12px; background: var(--light-blue); border-radius: 6px 6px 0 0; margin-bottom: 0; }
-.metric-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-.metric-table th { padding: 8px 12px; text-align: center; font-weight: 500; color: var(--muted); font-size: 11px; text-transform: uppercase; background: #fafbfc; border-bottom: 1px solid var(--border); }
-.metric-table th:first-child { text-align: left; }
-.metric-table td { padding: 7px 12px; border-bottom: 1px solid #f0f0f0; }
-.metric-table td:first-child { color: var(--text); }
-.metric-table td:not(:first-child) { text-align: center; font-variant-numeric: tabular-nums; }
-.metric-table tr:nth-child(even) { background: #fafbfc; }
-.metric-table .val-avg { font-weight: 600; color: var(--navy); }
-.metric-table .val-med { color: var(--text); }
-.metric-table .val-min { color: var(--red); }
-.metric-table .val-max { color: var(--green); }
-.metric-table .val-n { color: var(--muted); font-size: 12px; }
-.metric-table .na { color: #ccc; }
-
-.month-selector { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
-.month-selector label { font-size: 13px; font-weight: 500; color: var(--navy); }
-.month-selector select { padding: 6px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; }
-
-.no-data { text-align: center; padding: 40px; color: var(--muted); }
+.metrics-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.metrics-table th { background: var(--navy); color: #fff; padding: 10px 14px; text-align: left; font-weight: 600; }
+.metrics-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); }
+.metrics-table tr:last-child td { border-bottom: none; }
+.metrics-table tr:hover td { background: #fafbfc; }
+.metric-label { font-weight: 500; }
+.metric-group { background: var(--light-blue); font-weight: 700; color: var(--navy); font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+.no-data { color: var(--muted); font-style: italic; text-align: center; padding: 30px; }
 
 .hidden { display: none !important; }
+.spinner { display: inline-block; width: 18px; height: 18px; border: 3px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; }
+@keyframes spin { to { transform: rotate(360deg); } }
 </style>
 </head>
 <body>
 
 <div class="header">
-  <h1>TRMA Benchmarking — Reports</h1>
-  <a href="index.html">&larr; Back to Portal</a>
+  <h1>📊 TRMA Benchmarking — Reports</h1>
+  <a href="index.html">← Back to Dashboard</a>
 </div>
 
 <div class="container">
 
   <!-- TOKEN GATE -->
-  <div id="gateView" class="gate-wrapper">
-    <div class="card">
-      <h2>Access Benchmark Reports</h2>
-      <p class="subtitle">Enter the session token you received when you submitted your data.</p>
-      <div class="gate-input-row">
-        <input type="text" class="gate-input" id="tokenInput" placeholder="Paste your session token" onkeydown="if(event.key==='Enter')validateToken()">
-        <button class="btn btn-primary" id="validateBtn" onclick="validateToken()">Access</button>
-      </div>
-      <div id="gateError" class="alert alert-error hidden"></div>
-      <div class="alert alert-info" style="margin-top:16px">
-        Reports are only available to companies that have submitted benchmarking data. Your token was provided on the submission confirmation screen.
-      </div>
+  <div id="gateView" class="gate-wrapper card">
+    <h2>🔐 Member Access</h2>
+    <p class="gate-subtitle">Enter the session token you received when you submitted your data.</p>
+    <div class="gate-input-row">
+      <input type="text" id="tokenInput" placeholder="e.g. a1b2c3d4-e5f6-..." autocomplete="off" />
+      <button class="btn btn-primary" onclick="validateToken()">
+        <span id="loginBtnText">View Reports</span>
+      </button>
+    </div>
+    <div class="gate-error" id="gateError"></div>
+    <p style="margin-top:18px;font-size:13px;color:var(--muted);text-align:center;">
+      Lost your token? Email <a href="mailto:tclark@trmanet.org" style="color:var(--blue);">tclark@trmanet.org</a>
+    </p>
+  </div>
+
+  <!-- PENDING: NOT ENOUGH SUBMISSIONS YET -->
+  <div id="pendingView" class="pending-wrapper hidden">
+    <div class="pending-icon">⏳</div>
+    <h2>Reports Coming Soon</h2>
+    <p>
+      To protect member confidentiality, benchmark reports are only released once
+      <strong>8 members</strong> have submitted data. We're not there yet — but check back soon!
+    </p>
+
+    <div class="progress-label" id="progressLabel">— of 8 submissions received</div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progressFill" style="width: 0%"></div>
+    </div>
+    <div class="progress-sub" id="progressSub"></div>
+
+    <div class="pending-note">
+      <strong>📬 What happens when we hit 8?</strong>
+      Your token will automatically unlock the full report — no re-registration needed.
+      You'll be able to view aggregated industry benchmarks across all participating companies.
+      <br><br>
+      Questions? Contact <a href="mailto:tclark@trmanet.org" style="color:var(--blue);">tclark@trmanet.org</a>
+    </div>
+
+    <div style="margin-top:24px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+      <button class="btn btn-secondary" onclick="checkAgain()">🔄 Check Again</button>
+      <a href="index.html" class="btn btn-secondary">← Back to Dashboard</a>
     </div>
   </div>
 
-  <!-- REPORTS VIEW -->
+  <!-- FULL REPORTS VIEW -->
   <div id="reportView" class="hidden">
     <div class="report-header">
       <div>
@@ -151,316 +176,258 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
 const SUPABASE_URL = 'https://hktzvlkrimpfreeoehsi.supabase.co';
 const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhrdHp2bGtyaW1wZnJlZW9laHNpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MjQwNTEsImV4cCI6MjA5MDIwMDA1MX0.1bYxe1z-BFw4N9kvORaBsvGBVZfsw_cSOiOzsOnr3g0';
 
+const MIN_SUBMISSIONS = 8;
+
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const PHASE_NAMES = { A:'Acquisition & Retention', B:'Decision', C:'Payments', D:'Accounts Receivable', E:'Write-Off', F:'Recovery' };
 
-// Metric definitions (from survey_formulas) — simplified for client-side computation
-// Format: { metric_id, label, group, group_label, numerator (ref expression), denominator (ref expression), format }
 const FORMULAS = [
-  // Phase A
   {id:'A1_prime',label:'% Prime',group:'A1',gl:'Application: % Prime, Subprime, Unscored',n:'1a',d:'1a+1b',f:'pct',p:'A'},
   {id:'A1_sub',label:'% Subprime',group:'A1',gl:'Application: % Prime, Subprime, Unscored',n:'1b',d:'1a+1b',f:'pct',p:'A'},
-  {id:'A1_nohit',label:'% Unscored (No Hit)',group:'A1',gl:'Application: % Prime, Subprime, Unscored',n:'1c',d:'1.0',f:'pct',p:'A'},
-  {id:'A1_unsc',label:'% Unscored (Company)',group:'A1',gl:'Application: % Prime, Subprime, Unscored',n:'1d',d:'1.0',f:'pct',p:'A'},
-  {id:'A3_1',label:'No Hit % (Total)',group:'A3',gl:'No Hit %',n:'3.0',d:'1.0',f:'pct',p:'A'},
-  {id:'A4_1',label:'Manual Review % (Total)',group:'A4',gl:'Manual Review %',n:'4.0',d:'1.0',f:'pct',p:'A'},
-  {id:'A5',label:'% Reviewed & Rejected (Fraud)',group:'A5',gl:'Fraud Rejection Rate',n:'5.0',d:'4.0',f:'pct',p:'A'},
-  {id:'A8_total',label:'Activation Rate (Total)',group:'A8',gl:'Activation Rate',n:'8.0',d:'1.0',f:'pct',p:'A'},
-  {id:'A10_1',label:'% Activations with Risk Mitigation',group:'A10',gl:'Activation Risk Mitigation',n:'10.0',d:'8.0',f:'pct',p:'A'},
-  {id:'A12',label:'6-Month Survival Rate',group:'A12',gl:'Survival Rate',n:'15.0',d:'14.0',f:'pct',p:'A'},
-
-  // Phase B
-  {id:'B1_never',label:'Never Pay Rate',group:'B1',gl:'Never/Non Pay Rate',n:'20a',d:'8.0',f:'pct',p:'B'},
-  {id:'B1_non',label:'Non Pay Rate',group:'B1',gl:'Never/Non Pay Rate',n:'20b',d:'8.0',f:'pct',p:'B'},
-  {id:'B2_fraud',label:'Fraud Rate (Accounts)',group:'B2',gl:'Fraud',n:'21.0',d:'8.0',f:'pct',p:'B'},
-  {id:'B4_review',label:'Existing Base Review Rate',group:'B4',gl:'Existing Base',n:'24.0',d:'23.0',f:'pct',p:'B'},
-
-  // Phase C
-  {id:'C1_elec',label:'Electronic Only',group:'C1',gl:'Billing Method',n:'30a',d:'30a+30b+30c+30d+30e',f:'pct',p:'C'},
-  {id:'C1_paper',label:'Paper Only',group:'C1',gl:'Billing Method',n:'30b',d:'30a+30b+30c+30d+30e',f:'pct',p:'C'},
-  {id:'C2_autopay',label:'Autopay',group:'C2',gl:'Payment Channel Highlights',n:'31d',d:'31a+31b+31c+31d+31e+31f+31g+31h+31i+31k',f:'pct',p:'C'},
-  {id:'C2_website',label:'Carrier Website',group:'C2',gl:'Payment Channel Highlights',n:'31f',d:'31a+31b+31c+31d+31e+31f+31g+31h+31i+31k',f:'pct',p:'C'},
-  {id:'C2_app',label:'Mobile App',group:'C2',gl:'Payment Channel Highlights',n:'31g',d:'31a+31b+31c+31d+31e+31f+31g+31h+31i+31k',f:'pct',p:'C'},
-  {id:'C4_eft',label:'EFT/ACH Reversal Rate',group:'C4',gl:'Payment Reversal Rate',n:'36a',d:'33a+33b',f:'pct',p:'C'},
-  {id:'C4_check',label:'Paper Check Reversal Rate',group:'C4',gl:'Payment Reversal Rate',n:'36b',d:'33c',f:'pct',p:'C'},
-
-  // Phase D
-  {id:'D1_current',label:'% Current',group:'D1',gl:'AR Accounts Distribution',n:'45a',d:'45a+45b+45c+45d+45e',f:'pct',p:'D'},
-  {id:'D1_1_30',label:'% 1-30 DPD',group:'D1',gl:'AR Accounts Distribution',n:'45b',d:'45a+45b+45c+45d+45e',f:'pct',p:'D'},
-  {id:'D1_31_60',label:'% 31-60 DPD',group:'D1',gl:'AR Accounts Distribution',n:'45c',d:'45a+45b+45c+45d+45e',f:'pct',p:'D'},
-  {id:'D1_61_90',label:'% 61-90 DPD',group:'D1',gl:'AR Accounts Distribution',n:'45d',d:'45a+45b+45c+45d+45e',f:'pct',p:'D'},
-  {id:'D1_91',label:'% 91+ DPD',group:'D1',gl:'AR Accounts Distribution',n:'45e',d:'45a+45b+45c+45d+45e',f:'pct',p:'D'},
-  {id:'D5',label:'Net Bad Debt %',group:'D5',gl:'Bad Debt',n:'50-41.0',d:'40',f:'pct',p:'D'},
-  {id:'D6',label:'Gross Bad Debt %',group:'D6',gl:'Bad Debt',n:'50',d:'40',f:'pct',p:'D'},
-  {id:'D7',label:'Promise Kept Rate',group:'D7',gl:'Promise Kept Rate',n:'47',d:'48',f:'pct',p:'D'},
-
-  // Phase E
-  {id:'E1_vol',label:'% Voluntary',group:'E1',gl:'Write-Off Distribution ($)',n:'50a',d:'50a+50b+50c',f:'pct',p:'E'},
-  {id:'E1_invol',label:'% Involuntary',group:'E1',gl:'Write-Off Distribution ($)',n:'50b',d:'50a+50b+50c',f:'pct',p:'E'},
-  {id:'E6',label:'Involuntary Churn (of Total Accounts)',group:'E6',gl:'Churn',n:'16a',d:'12.0',f:'pct',p:'E'},
-  {id:'E7',label:'Involuntary Churn (of Total Churn)',group:'E7',gl:'Churn',n:'16a',d:'16a+16b',f:'pct',p:'E'},
-  {id:'E5',label:'Write-Off Lag (Days)',group:'E5',gl:'Write-Off Lag',n:'53',d:null,f:'days',p:'E'},
-
-  // Phase F
-  {id:'F5_1',label:'Gross Recovery Rate (1st)',group:'F5',gl:'Gross Recovery Rate',n:'65.3',d:'65.2',f:'pct',p:'F'},
-  {id:'F5_2',label:'Gross Recovery Rate (2nd)',group:'F5',gl:'Gross Recovery Rate',n:'66.3',d:'66.2',f:'pct',p:'F'},
-  {id:'F5_3',label:'Gross Recovery Rate (3rd)',group:'F5',gl:'Gross Recovery Rate',n:'67.3',d:'67.2',f:'pct',p:'F'},
-  {id:'F5_4',label:'Gross Recovery Rate (Warehouse)',group:'F5',gl:'Gross Recovery Rate',n:'68.3',d:'68.2',f:'pct',p:'F'},
-  {id:'F11_1',label:'Net Back % (1st)',group:'F11',gl:'Net Back %',n:'65.3-(65.3*65.5)',d:'65.2',f:'pct',p:'F'},
-  {id:'F11_2',label:'Net Back % (2nd)',group:'F11',gl:'Net Back %',n:'66.3-(66.3*66.5)',d:'66.2',f:'pct',p:'F'},
+  {id:'A2_approve',label:'Approval Rate',group:'A2',gl:'Approval Rates',n:'2a',d:'1a+1b',f:'pct',p:'A'},
+  {id:'A3_activate',label:'Activation Rate',group:'A3',gl:'Activation Rate',n:'3a',d:'2a',f:'pct',p:'A'},
+  {id:'A4_churn',label:'Churn Rate',group:'A4',gl:'Churn Rate',n:'4a',d:'4b',f:'pct',p:'A'},
+  {id:'B1_deny',label:'Denial Rate',group:'B1',gl:'Denial Rates',n:'B1a',d:'B1a+B1b',f:'pct',p:'B'},
+  {id:'C1_autopay',label:'AutoPay Enrollment',group:'C1',gl:'Payment Methods',n:'C1a',d:'C1b',f:'pct',p:'C'},
+  {id:'D1_dso',label:'Days Sales Outstanding',group:'D1',gl:'DSO',n:'D1a',d:'D1b',f:'days',p:'D'},
+  {id:'D2_current',label:'% Current',group:'D2',gl:'Aging Buckets',n:'D2a',d:'D2total',f:'pct',p:'D'},
+  {id:'E1_worate',label:'Write-Off Rate',group:'E1',gl:'Write-Off Rate',n:'E1a',d:'E1b',f:'pct',p:'E'},
+  {id:'F1_recovery',label:'Recovery Rate',group:'F1',gl:'Recovery Rate',n:'F1a',d:'F1b',f:'pct',p:'F'},
 ];
 
 let allSubmissions = [];
 let activePhase = 'A';
+let validToken = null;
 
-// ============================================================
-// TOKEN VALIDATION
-// ============================================================
+async function sbFetch(path) {
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+    headers: { 'apikey': ANON_KEY, 'Authorization': `Bearer ${ANON_KEY}` }
+  });
+  if (!r.ok) throw new Error(`Supabase error: ${r.status}`);
+  return r.json();
+}
+
 async function validateToken() {
-  const input = document.getElementById('tokenInput');
-  const btn = document.getElementById('validateBtn');
-  const errEl = document.getElementById('gateError');
-  const token = input.value.trim();
+  const token = document.getElementById('tokenInput').value.trim();
+  if (!token) { showError('Please enter your session token.'); return; }
 
-  errEl.classList.add('hidden');
-  input.classList.remove('error');
-
-  if (!token) {
-    input.classList.add('error');
-    errEl.textContent = 'Please enter your session token.';
-    errEl.classList.remove('hidden');
-    return;
-  }
-
+  const btn = document.querySelector('#gateView .btn-primary');
+  const btnText = document.getElementById('loginBtnText');
+  btnText.innerHTML = '<span class="spinner"></span>';
   btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span>';
+  showError('');
 
   try {
-    // Check if token exists in raw_submissions
-    const resp = await fetch(
-      `${SUPABASE_URL}/rest/v1/raw_submissions?session_token=eq.${encodeURIComponent(token)}&select=id,session_token`,
-      { headers: { 'apikey': ANON_KEY, 'Authorization': `Bearer ${ANON_KEY}` } }
-    );
-
-    if (!resp.ok) throw new Error('Server error');
-    const matches = await resp.json();
-
-    if (matches.length === 0) {
-      input.classList.add('error');
-      errEl.textContent = 'Token not found. Reports are only available to companies that have submitted data.';
-      errEl.classList.remove('hidden');
+    // 1. Verify token exists in raw_submissions
+    const match = await sbFetch(`raw_submissions?session_token=eq.${encodeURIComponent(token)}&select=id,session_token,submitted_at&limit=1`);
+    if (!match || match.length === 0) {
+      showError('Token not found. Please check and try again.');
       return;
     }
+    validToken = token;
 
-    // Token valid — load all submissions for aggregation
-    await loadAllSubmissions();
-    showReports();
+    // 2. Count total unique submissions (by session_token)
+    const all = await sbFetch(`raw_submissions?select=session_token,field_id,field_value,reporting_month,phase`);
+    allSubmissions = all || [];
 
-  } catch (err) {
-    errEl.textContent = 'Error validating token: ' + err.message;
-    errEl.classList.remove('hidden');
+    const uniqueTokens = new Set(all.map(r => r.session_token));
+    const submissionCount = uniqueTokens.size;
+
+    if (submissionCount < MIN_SUBMISSIONS) {
+      // Show pending screen with progress
+      showPending(submissionCount);
+    } else {
+      // Show full reports
+      showReports();
+    }
+  } catch(e) {
+    showError('Connection error. Please try again.');
+    console.error(e);
   } finally {
+    btnText.textContent = 'View Reports';
     btn.disabled = false;
-    btn.innerHTML = 'Access';
   }
 }
 
-async function loadAllSubmissions() {
-  const resp = await fetch(
-    `${SUPABASE_URL}/rest/v1/raw_submissions?select=data_json,submitted_at,country,entity_type,phases_included&order=submitted_at.desc`,
-    { headers: { 'apikey': ANON_KEY, 'Authorization': `Bearer ${ANON_KEY}` } }
-  );
-  if (!resp.ok) throw new Error('Could not load benchmark data');
-  allSubmissions = await resp.json();
+function showError(msg) {
+  document.getElementById('gateError').textContent = msg;
 }
 
-// ============================================================
-// SHOW REPORTS
-// ============================================================
+function showPending(count) {
+  document.getElementById('gateView').classList.add('hidden');
+  document.getElementById('pendingView').classList.remove('hidden');
+
+  const pct = Math.min(100, Math.round((count / MIN_SUBMISSIONS) * 100));
+  document.getElementById('progressLabel').textContent = `${count} of ${MIN_SUBMISSIONS} submissions received`;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressSub').textContent = `${MIN_SUBMISSIONS - count} more member${MIN_SUBMISSIONS - count === 1 ? '' : 's'} needed to unlock reports`;
+}
+
+async function checkAgain() {
+  // Re-check the count using the stored valid token
+  document.getElementById('tokenInput').value = validToken || '';
+  document.getElementById('pendingView').classList.add('hidden');
+  document.getElementById('gateView').classList.remove('hidden');
+  await validateToken();
+}
+
 function showReports() {
   document.getElementById('gateView').classList.add('hidden');
+  document.getElementById('pendingView').classList.add('hidden');
   document.getElementById('reportView').classList.remove('hidden');
 
-  // Meta
-  document.getElementById('reportMeta').textContent =
-    `Based on ${allSubmissions.length} submission${allSubmissions.length !== 1 ? 's' : ''} · Generated ${new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`;
+  // Summary stats
+  const uniqueTokens = new Set(allSubmissions.map(r => r.session_token));
+  const months = [...new Set(allSubmissions.map(r => r.reporting_month))].filter(Boolean).sort();
+  const phases = [...new Set(allSubmissions.map(r => r.phase))].filter(Boolean).sort();
 
-  // Summary cards
-  const phases = new Set();
-  allSubmissions.forEach(s => (s.phases_included || []).forEach(p => phases.add(p)));
+  document.getElementById('reportMeta').textContent =
+    `Based on ${uniqueTokens.size} member submissions • Updated ${new Date().toLocaleDateString()}`;
 
   document.getElementById('reportSummary').innerHTML = `
-    <div class="summary-item"><div class="count">${allSubmissions.length}</div><div class="label">Participating Companies</div></div>
-    <div class="summary-item"><div class="count">${phases.size}</div><div class="label">Phases Covered</div></div>
-    <div class="summary-item"><div class="count">${FORMULAS.length}</div><div class="label">Metrics Benchmarked</div></div>
+    <div class="summary-card"><div class="val">${uniqueTokens.size}</div><div class="lbl">Members Participating</div></div>
+    <div class="summary-card"><div class="val">${months.length}</div><div class="lbl">Months of Data</div></div>
+    <div class="summary-card"><div class="val">${phases.length}</div><div class="lbl">Phases Covered</div></div>
+    <div class="summary-card"><div class="val">${allSubmissions.length.toLocaleString()}</div><div class="lbl">Data Points</div></div>
   `;
 
   // Month selector
-  const monthSelect = document.getElementById('monthSelect');
-  monthSelect.innerHTML = MONTHS.map((m, i) =>
-    `<option value="${m}" ${i === 0 ? 'selected' : ''}>${m}</option>`
-  ).join('');
+  const sel = document.getElementById('monthSelect');
+  sel.innerHTML = months.length
+    ? months.map(m => `<option value="${m}">${formatMonth(m)}</option>`).join('')
+    : '<option value="">No data yet</option>';
 
   // Phase tabs
-  renderPhaseTabs();
-  renderMetrics();
-}
-
-function renderPhaseTabs() {
-  const container = document.getElementById('phaseTabs');
-  container.innerHTML = ['A','B','C','D','E','F'].map(p =>
-    `<div class="phase-tab ${p === activePhase ? 'active' : ''}" onclick="switchPhase('${p}')">${p}: ${PHASE_NAMES[p]}</div>`
+  document.getElementById('phaseTabs').innerHTML = phases.map(p =>
+    `<div class="phase-tab${p === activePhase ? ' active' : ''}" onclick="setPhase('${p}')">${p}: ${PHASE_NAMES[p] || p}</div>`
   ).join('');
-}
 
-function switchPhase(p) {
-  activePhase = p;
-  renderPhaseTabs();
   renderMetrics();
 }
 
-// ============================================================
-// COMPUTE & RENDER METRICS
-// ============================================================
-function evalExpr(expr, data) {
-  // Parse a ref expression like "1a+1b" or "50-41.0" or "65.3-(65.3*65.5)"
-  // and compute the value from a submission's data for a given month
-  if (!expr) return null;
-
-  // Replace ref codes with their values
-  let jsExpr = expr;
-
-  // Sort refs by length descending so "65.5" is replaced before "65"
-  const refs = expr.match(/[\d]+[a-z]?\.?[\d]*/g) || [];
-  const sortedRefs = [...new Set(refs)].sort((a, b) => b.length - a.length);
-
-  for (const ref of sortedRefs) {
-    const val = data[ref];
-    if (val === undefined || val === null || val === 'NA') return null;
-    jsExpr = jsExpr.replaceAll(ref, `(${val})`);
-  }
-
-  try {
-    const result = eval(jsExpr);
-    if (!isFinite(result)) return null;
-    return result;
-  } catch { return null; }
+function formatMonth(m) {
+  if (!m) return '';
+  const [y, mo] = m.split('-');
+  return `${MONTHS[parseInt(mo,10)-1]} ${y}`;
 }
 
-function computeMetric(formula, month) {
-  const values = [];
-
-  for (const sub of allSubmissions) {
-    const data = sub.data_json || {};
-
-    // Build month-specific data map: ref -> value for this month
-    const monthData = {};
-    for (const [ref, months] of Object.entries(data)) {
-      if (months && months[month] !== undefined && months[month] !== null && months[month] !== 'NA') {
-        monthData[ref] = months[month];
-      }
-    }
-
-    // Compute numerator
-    const num = evalExpr(formula.n, monthData);
-    if (num === null) continue;
-
-    let result;
-    if (formula.d) {
-      const den = evalExpr(formula.d, monthData);
-      if (!den || den === 0) continue;
-      result = num / den;
-      if (formula.f === 'pct') result *= 100;
-    } else {
-      result = num;
-    }
-
-    if (isFinite(result)) values.push(result);
-  }
-
-  if (values.length === 0) return null;
-
-  values.sort((a, b) => a - b);
-  const avg = values.reduce((s, v) => s + v, 0) / values.length;
-  const med = values.length % 2 === 0
-    ? (values[values.length / 2 - 1] + values[values.length / 2]) / 2
-    : values[Math.floor(values.length / 2)];
-
-  return {
-    avg, med,
-    min: values[0],
-    max: values[values.length - 1],
-    n: values.length
-  };
+function setPhase(p) {
+  activePhase = p;
+  document.querySelectorAll('.phase-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.phase-tab').forEach(t => { if (t.textContent.startsWith(p+':')) t.classList.add('active'); });
+  renderMetrics();
 }
 
-function formatVal(v, fmt) {
-  if (v === null || v === undefined) return '<span class="na">—</span>';
-  if (fmt === 'pct') return v.toFixed(1) + '%';
-  if (fmt === 'days') return v.toFixed(0) + ' days';
-  if (fmt === 'currency') return '$' + v.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
-  return v.toFixed(1);
+function getVal(submissions, month, fieldId) {
+  return submissions
+    .filter(r => r.reporting_month === month && r.field_id === fieldId)
+    .map(r => parseFloat(r.field_value))
+    .filter(v => !isNaN(v));
+}
+
+function calcMetric(formula, submissions, month) {
+  // Simple ratio: sum(numerator fields) / sum(denominator fields)
+  const nFields = formula.n.split('+');
+  const dFields = formula.d.split('+');
+
+  const nVals = nFields.flatMap(f => getVal(submissions, month, f.trim()));
+  const dVals = dFields.flatMap(f => getVal(submissions, month, f.trim()));
+
+  if (!nVals.length || !dVals.length) return null;
+
+  const nSum = nVals.reduce((a, b) => a + b, 0);
+  const dSum = dVals.reduce((a, b) => a + b, 0);
+
+  if (dSum === 0) return null;
+  return nSum / dSum;
+}
+
+function fmt(val, type) {
+  if (val === null || val === undefined) return '—';
+  if (type === 'pct') return (val * 100).toFixed(1) + '%';
+  if (type === 'days') return val.toFixed(1) + ' days';
+  return val.toFixed(2);
 }
 
 function renderMetrics() {
   const month = document.getElementById('monthSelect').value;
-  const container = document.getElementById('metricsContainer');
   const phaseFormulas = FORMULAS.filter(f => f.p === activePhase);
 
-  if (phaseFormulas.length === 0) {
-    container.innerHTML = '<div class="no-data">No metrics defined for this phase yet.</div>';
+  if (!phaseFormulas.length) {
+    document.getElementById('metricsContainer').innerHTML = '<p class="no-data">No metrics defined for this phase yet.</p>';
     return;
   }
 
-  // Group by group_label
+  // Group by group label
   const groups = {};
-  for (const f of phaseFormulas) {
+  phaseFormulas.forEach(f => {
     if (!groups[f.gl]) groups[f.gl] = [];
     groups[f.gl].push(f);
-  }
+  });
 
-  let html = '';
-  for (const [groupLabel, formulas] of Object.entries(groups)) {
-    let rows = '';
-    for (const f of formulas) {
-      const result = computeMetric(f, month);
-      if (result) {
-        rows += `<tr>
-          <td>${f.label}</td>
-          <td class="val-avg">${formatVal(result.avg, f.f)}</td>
-          <td class="val-med">${formatVal(result.med, f.f)}</td>
-          <td class="val-min">${formatVal(result.min, f.f)}</td>
-          <td class="val-max">${formatVal(result.max, f.f)}</td>
-          <td class="val-n">${result.n}</td>
-        </tr>`;
-      } else {
-        rows += `<tr>
-          <td>${f.label}</td>
-          <td colspan="5" class="na" style="text-align:center">Insufficient data</td>
-        </tr>`;
+  const uniqueTokens = [...new Set(allSubmissions.map(r => r.session_token))];
+  const participantCount = uniqueTokens.size;
+
+  let html = `
+    <table class="metrics-table">
+      <thead>
+        <tr>
+          <th>Metric</th>
+          <th>Industry Avg</th>
+          <th>Median</th>
+          <th>Low</th>
+          <th>High</th>
+          <th>Participants</th>
+        </tr>
+      </thead>
+      <tbody>
+  `;
+
+  Object.entries(groups).forEach(([groupLabel, formulas]) => {
+    html += `<tr><td colspan="6" class="metric-group">${groupLabel}</td></tr>`;
+    formulas.forEach(formula => {
+      // Compute per-member values for avg/median/min/max
+      const memberVals = uniqueTokens.map(token => {
+        const memberSubs = allSubmissions.filter(r => r.session_token === token);
+        return calcMetric(formula, memberSubs, month);
+      }).filter(v => v !== null);
+
+      let avg = null, med = null, lo = null, hi = null;
+      if (memberVals.length > 0) {
+        avg = memberVals.reduce((a,b) => a+b, 0) / memberVals.length;
+        const sorted = [...memberVals].sort((a,b) => a-b);
+        const mid = Math.floor(sorted.length / 2);
+        med = sorted.length % 2 ? sorted[mid] : (sorted[mid-1] + sorted[mid]) / 2;
+        lo = sorted[0];
+        hi = sorted[sorted.length - 1];
       }
-    }
 
-    html += `
-      <div class="metric-group">
-        <h3>${groupLabel}</h3>
-        <table class="metric-table">
-          <thead><tr><th style="width:40%">Metric</th><th>Average</th><th>Median</th><th>Min</th><th>Max</th><th>n</th></tr></thead>
-          <tbody>${rows}</tbody>
-        </table>
-      </div>
-    `;
+      html += `
+        <tr>
+          <td class="metric-label">${formula.label}</td>
+          <td>${fmt(avg, formula.f)}</td>
+          <td>${fmt(med, formula.f)}</td>
+          <td>${fmt(lo, formula.f)}</td>
+          <td>${fmt(hi, formula.f)}</td>
+          <td>${memberVals.length} of ${participantCount}</td>
+        </tr>
+      `;
+    });
+  });
+
+  html += '</tbody></table>';
+  document.getElementById('metricsContainer').innerHTML = html;
+}
+
+// Auto-fill token from URL param
+window.addEventListener('DOMContentLoaded', () => {
+  const params = new URLSearchParams(window.location.search);
+  const t = params.get('token');
+  if (t) {
+    document.getElementById('tokenInput').value = t;
+    validateToken();
   }
-
-  container.innerHTML = html;
-}
-
-// Allow token from URL param (for easy sharing)
-const urlToken = new URLSearchParams(window.location.search).get('token');
-if (urlToken) {
-  document.getElementById('tokenInput').value = urlToken;
-  validateToken();
-}
+});
 </script>
 </body>
 </html>
