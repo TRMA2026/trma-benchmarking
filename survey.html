@@ -3,146 +3,683 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TRMA Benchmarking Portal</title>
+<title>TRMA Benchmarking — Data Entry</title>
 <style>
 :root {
-  --navy: #1B3A5C;
-  --blue: #2176BC;
-  --light-blue: #E8F0FE;
-  --green: #28a745;
-  --bg: #f8f9fa;
-  --card: #ffffff;
-  --text: #333333;
-  --muted: #6c757d;
-  --border: #dee2e6;
-  --radius: 10px;
+  --navy:#1B3A5C; --blue:#2176BC; --gold:#C9A227; --green:#28a745;
+  --red:#dc3545; --bg:#f4f6f9; --card:#fff; --border:#dee2e6;
+  --muted:#6c757d; --radius:8px;
 }
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; min-height: 100vh; }
-
-.hero { background: linear-gradient(135deg, var(--navy) 0%, #2a5a8c 100%); color: #fff; padding: 48px 24px 40px; text-align: center; }
-.hero h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.3px; }
-.hero p { font-size: 16px; color: #b8d4f0; max-width: 600px; margin: 0 auto; }
-.hero .tagline { font-size: 13px; color: #7aabda; margin-top: 12px; letter-spacing: 1px; text-transform: uppercase; }
-
-.container { max-width: 900px; margin: 0 auto; padding: 32px 24px; }
-
-.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: -40px; position: relative; z-index: 1; }
-
-.card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px 24px; text-align: center; transition: all 0.2s; text-decoration: none; color: var(--text); display: flex; flex-direction: column; align-items: center; }
-.card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.08); border-color: var(--blue); }
-
-.card-icon { width: 56px; height: 56px; border-radius: 14px; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; }
-.card-icon svg { width: 28px; height: 28px; }
-.card-icon.blue { background: var(--light-blue); color: var(--blue); }
-.card-icon.green { background: #e8f5e9; color: var(--green); }
-.card-icon.navy { background: #e3eaf2; color: var(--navy); }
-
-.card h2 { font-size: 17px; color: var(--navy); margin-bottom: 6px; font-weight: 600; }
-.card p { font-size: 13px; color: var(--muted); line-height: 1.5; flex: 1; }
-.card .arrow { margin-top: 14px; font-size: 13px; color: var(--blue); font-weight: 500; }
-
-.info-section { margin-top: 40px; }
-.info-section h3 { font-size: 16px; color: var(--navy); margin-bottom: 12px; }
-
-.phases { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; }
-.phase-chip { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 12px 10px; text-align: center; }
-.phase-chip .code { font-size: 20px; font-weight: 700; color: var(--blue); }
-.phase-chip .name { font-size: 11px; color: var(--muted); margin-top: 2px; }
-
-.footer { text-align: center; padding: 32px 24px; color: var(--muted); font-size: 12px; }
-.footer a { color: var(--blue); text-decoration: none; }
-
-.template-bar { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 24px; margin-top: 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
-.template-bar .info { font-size: 14px; color: var(--text); }
-.template-bar .info span { color: var(--muted); font-size: 13px; }
-.btn { display: inline-flex; align-items: center; gap: 6px; padding: 9px 20px; border: none; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; text-decoration: none; transition: all 0.15s; }
-.btn-primary { background: var(--blue); color: #fff; }
-.btn-primary:hover { background: #1a65a3; }
-.btn-outline { background: #fff; color: var(--navy); border: 1px solid var(--border); }
-.btn-outline:hover { background: #f8f9fa; }
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:#333;font-size:14px;}
+.nav{background:var(--navy);color:#fff;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;position:sticky;top:0;z-index:100;}
+.nav h1{font-size:17px;font-weight:700;}
+.nav-right{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.nav a{color:#a8c8e8;text-decoration:none;font-size:13px;}
+.nav a:hover{color:#fff;}
+.container{max-width:960px;margin:0 auto;padding:20px;}
+/* Phase tabs */
+.phase-nav{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:20px;}
+.phase-btn{padding:8px 16px;border:1px solid var(--border);background:#fff;border-radius:6px 6px 0 0;cursor:pointer;font-size:13px;font-weight:600;color:var(--muted);transition:all .15s;}
+.phase-btn.active{background:var(--navy);color:#fff;border-color:var(--navy);}
+.phase-btn:hover:not(.active){background:#e8f0fe;color:var(--navy);}
+.phase-btn .badge{display:inline-block;margin-left:6px;background:var(--green);color:#fff;border-radius:99px;padding:1px 6px;font-size:11px;}
+.phase-btn.active .badge{background:rgba(255,255,255,0.3);}
+/* Cards */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px;}
+.card-title{font-weight:700;color:var(--navy);font-size:14px;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid var(--gold);}
+/* Month nav */
+.month-bar{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:16px;}
+.month-btn{padding:5px 10px;border:1px solid var(--border);background:#fff;border-radius:4px;cursor:pointer;font-size:12px;font-weight:600;color:var(--muted);transition:all .15s;position:relative;}
+.month-btn.active{background:var(--blue);color:#fff;border-color:var(--blue);}
+.month-btn:hover:not(.active){background:#e8f0fe;}
+.month-btn .dot{position:absolute;top:2px;right:2px;width:6px;height:6px;background:var(--green);border-radius:50%;display:none;}
+.month-btn.has-data .dot{display:block;}
+/* Table */
+.data-table{width:100%;border-collapse:collapse;font-size:13px;}
+.data-table th{background:var(--navy);color:#fff;padding:8px 10px;text-align:left;font-size:12px;font-weight:600;}
+.data-table td{padding:6px 10px;border-bottom:1px solid #f0f0f0;vertical-align:middle;}
+.data-table tr:last-child td{border-bottom:none;}
+.data-table tr:hover td{background:#fafbfc;}
+.ref-col{width:70px;font-family:monospace;font-size:12px;color:var(--muted);}
+.num-input{width:130px;padding:5px 8px;border:1px solid var(--border);border-radius:4px;font-size:13px;text-align:right;}
+.num-input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 2px rgba(33,118,188,.15);}
+.calc-row td{background:#eef4fb;font-style:italic;color:var(--blue);}
+.calc-val{font-weight:600;color:var(--blue);}
+/* Progress */
+.progress-wrap{background:#e9ecef;border-radius:99px;height:10px;overflow:hidden;margin:6px 0;}
+.progress-fill{background:linear-gradient(90deg,var(--blue),#1a5fa8);height:100%;border-radius:99px;transition:width .4s;}
+.progress-label{font-size:12px;color:var(--muted);}
+/* Profile screen */
+.profile-card{max-width:520px;margin:40px auto;}
+.form-group{margin-bottom:16px;}
+.form-group label{display:block;font-weight:600;color:var(--navy);margin-bottom:6px;font-size:13px;}
+.form-group input,.form-group select{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius);font-size:14px;}
+.form-group input:focus,.form-group select:focus{outline:none;border-color:var(--blue);}
+/* Buttons */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:var(--radius);border:none;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;text-decoration:none;}
+.btn-primary{background:var(--blue);color:#fff;}
+.btn-primary:hover{background:#1a5fa8;}
+.btn-gold{background:var(--gold);color:#fff;}
+.btn-gold:hover{background:#b8911f;}
+.btn-secondary{background:#fff;color:var(--navy);border:1px solid var(--border);}
+.btn-secondary:hover{background:var(--bg);}
+.btn-danger{background:var(--red);color:#fff;}
+/* Submit footer */
+.submit-footer{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;padding-top:12px;border-top:1px solid var(--border);margin-top:8px;}
+.error{color:var(--red);font-size:13px;}
+.success-box{background:#d4edda;border:1px solid #c3e6cb;border-radius:var(--radius);padding:20px;text-align:center;}
+.success-box h3{color:#155724;margin-bottom:8px;}
+.token-display{background:#fff;border:2px solid var(--green);border-radius:var(--radius);padding:12px 16px;font-family:monospace;font-size:15px;letter-spacing:1px;margin:12px 0;word-break:break-all;}
+.info-bar{background:#e8f4fd;border:1px solid #b8d4ef;border-radius:var(--radius);padding:12px 16px;font-size:13px;color:var(--navy);margin-bottom:16px;}
+.hidden{display:none!important;}
+.spinner{display:inline-block;width:16px;height:16px;border:3px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;}
+@keyframes spin{to{transform:rotate(360deg);}}
 </style>
 </head>
 <body>
 
-<div class="hero">
-  <div class="tagline">Telecommunications Risk Management Association</div>
-  <h1>TRMA Benchmarking Portal</h1>
-  <p>Enter your operational data, benchmark against industry peers, and access aggregated reports — all anonymously.</p>
+<div class="nav">
+  <h1>📋 TRMA Benchmarking — Data Entry</h1>
+  <div class="nav-right">
+    <span id="navCompany" style="font-size:13px;color:#a8c8e8;"></span>
+    <a href="index.html">← Dashboard</a>
+  </div>
 </div>
 
-<div class="container">
-
-  <div class="cards">
-    <!-- Upload Data -->
-    <a href="upload.html" class="card">
-      <div class="card-icon green">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
-        </svg>
-      </div>
-      <h2>Upload Data</h2>
-      <p>Upload your completed Excel template. Your data is parsed in-browser and submitted anonymously.</p>
-      <span class="arrow">Upload spreadsheet →</span>
-    </a>
-
-    <!-- View Reports -->
-    <a href="dashboard.html" class="card">
-      <div class="card-icon blue">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/>
-        </svg>
-      </div>
-      <h2>Dashboard &amp; Reports</h2>
-      <p>View aggregated benchmarks, peer comparisons, and trend data across all submitted metrics.</p>
-      <span class="arrow">View benchmarks →</span>
-    </a>
-
-    <!-- Admin -->
-    <a href="admin.html" class="card">
-      <div class="card-icon navy">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z"/>
-          <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-        </svg>
-      </div>
-      <h2>Admin Portal</h2>
-      <p>View all submissions, inspect individual records, export data to CSV. Password required.</p>
-      <span class="arrow">Admin login →</span>
-    </a>
-  </div>
-
-  <!-- Template download -->
-  <div class="template-bar">
-    <div class="info">
-      <strong>Download the Data Entry Template</strong><br>
-      <span>Excel file with all 6 phases — fill in your data, then upload above.</span>
+<!-- PROFILE SCREEN -->
+<div id="screenProfile" class="container">
+  <div class="profile-card card">
+    <div class="card-title">👤 Member Profile</div>
+    <p style="color:var(--muted);font-size:13px;margin-bottom:20px;">Enter your company details before submitting data. Contact <a href="mailto:tclark@trmanet.org" style="color:var(--blue);">tclark@trmanet.org</a> to receive your Company Code.</p>
+    <div class="form-group">
+      <label>Company Code *</label>
+      <input type="text" id="profileCode" placeholder="e.g. TRMA-001" />
     </div>
-    <a href="TRMA_Rapid_Survey_Template.xlsx" download class="btn btn-primary">
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
-      Download Template
-    </a>
+    <div class="form-group">
+      <label>Contact Name *</label>
+      <input type="text" id="profileName" placeholder="Your full name" />
+    </div>
+    <div class="form-group">
+      <label>Entity Type</label>
+      <select id="profileEntity">
+        <option value="">-- Select --</option>
+        <option>CLEC</option>
+        <option>ILEC</option>
+        <option>Cable / MSO</option>
+        <option>Wireless</option>
+        <option>VoIP / OTT</option>
+        <option>ISP</option>
+        <option>Other</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Reporting Year</label>
+      <select id="profileYear">
+        <option>2025</option>
+        <option selected>2026</option>
+      </select>
+    </div>
+    <div class="error" id="profileError" style="margin-bottom:10px;"></div>
+    <button class="btn btn-primary" onclick="startEntry()">Continue to Data Entry →</button>
+  </div>
+</div>
+
+<!-- DATA ENTRY SCREEN -->
+<div id="screenEntry" class="container hidden">
+
+  <div class="info-bar">
+    Enter whole-number counts and dollar amounts. Do not enter calculated percentages — the system computes those automatically. Enter <strong>0</strong> where applicable; leave blank only if truly not applicable.
   </div>
 
-  <!-- Phases overview -->
-  <div class="info-section">
-    <h3>Survey Phases</h3>
-    <div class="phases">
-      <div class="phase-chip"><div class="code">A</div><div class="name">Acquisition &amp; Retention</div></div>
-      <div class="phase-chip"><div class="code">B</div><div class="name">Decision</div></div>
-      <div class="phase-chip"><div class="code">C</div><div class="name">Payments</div></div>
-      <div class="phase-chip"><div class="code">D</div><div class="name">Accounts Receivable</div></div>
-      <div class="phase-chip"><div class="code">E</div><div class="name">Write-Off</div></div>
-      <div class="phase-chip"><div class="code">F</div><div class="name">Recovery</div></div>
+  <!-- Phase tabs -->
+  <div class="phase-nav" id="phaseTabs"></div>
+
+  <!-- Month bar -->
+  <div class="month-bar" id="monthBar"></div>
+
+  <!-- Phase content -->
+  <div id="phaseContent"></div>
+
+  <!-- Submit footer -->
+  <div class="card">
+    <div class="submit-footer">
+      <div>
+        <div class="progress-label" id="overallLabel">Overall completion: 0%</div>
+        <div class="progress-wrap" style="width:200px"><div class="progress-fill" id="overallBar" style="width:0%"></div></div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+        <span class="error" id="submitError"></span>
+        <button class="btn btn-secondary" onclick="saveDraft()">💾 Save Draft</button>
+        <button class="btn btn-gold" id="submitBtn" onclick="handleSubmit()">Submit Data</button>
+      </div>
     </div>
   </div>
 
 </div>
 
-<div class="footer">
-  &copy; 2026 Telecommunications Risk Management Association &middot; <a href="https://www.trma.org" target="_blank">trma.org</a><br>
-  Submissions are anonymous — no company names are stored.
+<!-- SUCCESS SCREEN -->
+<div id="screenSuccess" class="container hidden">
+  <div class="success-box card" style="max-width:520px;margin:40px auto;">
+    <div style="font-size:48px;margin-bottom:12px;">✅</div>
+    <h3>Submission Received!</h3>
+    <p style="color:#155724;margin-bottom:12px;">Your benchmarking data has been submitted successfully. Save your session token — you'll need it to access reports.</p>
+    <div class="token-display" id="successToken"></div>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:16px;">
+      <button class="btn btn-secondary" onclick="copyToken()">📋 Copy Token</button>
+      <a href="reports.html" class="btn btn-primary" id="reportsLink">📊 View Reports</a>
+    </div>
+    <p style="font-size:12px;color:#6c757d;margin-top:16px;">Lost your token? Email <a href="mailto:tclark@trmanet.org">tclark@trmanet.org</a></p>
+  </div>
 </div>
 
+<script>
+// ─────────────────────────────────────────────
+// CONFIG
+// ─────────────────────────────────────────────
+const SUPABASE_URL = 'https://hktzvlkrimpfreeoehsi.supabase.co';
+const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhrdHp2bGtyaW1wZnJlZW9laHNpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MjQwNTEsImV4cCI6MjA5MDIwMDA1MX0.1bYxe1z-BFw4N9kvORaBsvGBVZfsw_cSOiOzsOnr3g0';
+
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+// ─────────────────────────────────────────────
+// FIELD DEFINITIONS — All 6 Phases
+// ─────────────────────────────────────────────
+const PHASES = {
+
+  A: {
+    label: 'Acquisition',
+    groups: [
+      { g: 'A1 — Application: Credit Score Distribution', items: [
+        {id:'1a', lb:'# Prime Applications', type:'count'},
+        {id:'1b', lb:'# Subprime Applications', type:'count'},
+        {id:'1c', lb:'# Unscored — Bureau No Hit', type:'count'},
+        {id:'1d', lb:'# Unscored — Company Initiated', type:'count'},
+      ]},
+      { g: 'A2 — Applications by Sales Channel', items: [
+        {id:'2.0', lb:'Total Applications', type:'count', ro:true, calc:(d)=>['2a','2b','2c','2d','2e','2.2','2.3'].reduce((s,k)=>s+(+d[k]||0),0)},
+        {id:'2a', lb:'Direct — Retail Stores', type:'count'},
+        {id:'2b', lb:'Direct — Direct Sales', type:'count'},
+        {id:'2c', lb:'Direct — Call Centers', type:'count'},
+        {id:'2d', lb:'Direct — Company Websites', type:'count'},
+        {id:'2e', lb:'Direct — Other', type:'count'},
+        {id:'2.2', lb:'Indirect', type:'count'},
+        {id:'2.3', lb:'Unknown', type:'count'},
+      ]},
+      { g: 'A3 — No Hit', items: [
+        {id:'3.0', lb:'Total No Hit Count', type:'count'},
+        {id:'3a', lb:'Bureau No Hit Count', type:'count'},
+        {id:'3b', lb:'Company No Hit Count', type:'count'},
+      ]},
+      { g: 'A4 — Manual Review', items: [
+        {id:'4.0', lb:'Total Manual Reviews', type:'count'},
+        {id:'4.1', lb:'Manual Review — Direct', type:'count'},
+        {id:'4.2', lb:'Manual Review — Indirect', type:'count'},
+        {id:'4.3', lb:'Manual Review — Unknown', type:'count'},
+      ]},
+      { g: 'A5 — Fraud & Risk Mitigation', items: [
+        {id:'5.0', lb:'# Manually Reviewed & Rejected (Fraud)', type:'count'},
+        {id:'6.0', lb:'# Applications with Risk Mitigation', type:'count'},
+        {id:'6.1', lb:'# Risk Mitigation — Deposit Required', type:'count'},
+        {id:'6.2', lb:'# Risk Mitigation — Credit Limit Set', type:'count'},
+        {id:'6.3', lb:'# Risk Mitigation — Prepay Required', type:'count'},
+        {id:'6.4', lb:'# Risk Mitigation — Other', type:'count'},
+      ]},
+      { g: 'A6 — Approvals & Activations', items: [
+        {id:'7.0', lb:'# Applications Approved', type:'count'},
+        {id:'8.0', lb:'# Approved Applications Activated', type:'count'},
+        {id:'9.0', lb:'# New Accounts — Direct Channel', type:'count'},
+        {id:'9.1', lb:'# New Accounts — Indirect Channel', type:'count'},
+      ]},
+      { g: 'A7 — Churn & Attrition', items: [
+        {id:'10.0', lb:'Total Active Accounts (End of Period)', type:'count'},
+        {id:'11.0', lb:'# Accounts Churned (Voluntary)', type:'count'},
+        {id:'11.1', lb:'# Accounts Churned (Involuntary — Non-Pay)', type:'count'},
+        {id:'11.2', lb:'# Accounts Churned (Involuntary — Fraud)', type:'count'},
+      ]},
+    ]
+  },
+
+  B: {
+    label: 'Decision',
+    groups: [
+      { g: 'B1 — Deposit Decisions', items: [
+        {id:'B1a', lb:'# Accounts Requiring Deposit', type:'count'},
+        {id:'B1b', lb:'# Accounts Approved Without Deposit', type:'count'},
+        {id:'B1c', lb:'$ Total Deposits Collected', type:'currency'},
+        {id:'B1d', lb:'$ Total Deposits Refunded', type:'currency'},
+        {id:'B1e', lb:'# Deposits Refunded', type:'count'},
+      ]},
+      { g: 'B2 — Credit Limit Decisions', items: [
+        {id:'B2a', lb:'$ Average Credit Limit — New Accounts', type:'currency'},
+        {id:'B2b', lb:'$ Average Credit Limit — Existing Accounts', type:'currency'},
+        {id:'B2c', lb:'# Credit Limit Increases Granted', type:'count'},
+        {id:'B2d', lb:'# Credit Limit Decreases Applied', type:'count'},
+      ]},
+      { g: 'B3 — Prepay / Alternative Programs', items: [
+        {id:'B3a', lb:'# Accounts on Prepay Program', type:'count'},
+        {id:'B3b', lb:'# Prepay Accounts Converted to Postpay', type:'count'},
+        {id:'B3c', lb:'# Accounts Denied — Fraud Flag', type:'count'},
+        {id:'B3d', lb:'# Accounts Denied — Credit Score', type:'count'},
+        {id:'B3e', lb:'# Accounts Denied — Other', type:'count'},
+      ]},
+    ]
+  },
+
+  C: {
+    label: 'Payments',
+    groups: [
+      { g: 'C1 — Payment Methods & AutoPay', items: [
+        {id:'C1a', lb:'# Accounts on AutoPay', type:'count'},
+        {id:'C1b', lb:'Total Active Accounts', type:'count'},
+        {id:'C1c', lb:'# AutoPay Failures (NSF / Declined)', type:'count'},
+        {id:'C1d', lb:'# Accounts Paying by Check', type:'count'},
+        {id:'C1e', lb:'# Accounts Paying by ACH / Bank Draft', type:'count'},
+        {id:'C1f', lb:'# Accounts Paying by Credit / Debit Card', type:'count'},
+        {id:'C1g', lb:'# Accounts Paying by Other Method', type:'count'},
+      ]},
+      { g: 'C2 — Payment Timing & Delinquency', items: [
+        {id:'C2a', lb:'# Payments Received On Time (by due date)', type:'count'},
+        {id:'C2b', lb:'# Payments Received Late (1–30 days past due)', type:'count'},
+        {id:'C2c', lb:'# Payments Received Late (31–60 days past due)', type:'count'},
+        {id:'C2d', lb:'# Payments Received Late (60+ days past due)', type:'count'},
+        {id:'C2e', lb:'$ Total Payments Received', type:'currency'},
+      ]},
+      { g: 'C3 — Returned Payments', items: [
+        {id:'C3a', lb:'# Returned / Rejected Payments', type:'count'},
+        {id:'C3b', lb:'$ Total Returned Payment Amount', type:'currency'},
+        {id:'C3c', lb:'# Returned Payments Recovered', type:'count'},
+        {id:'C3d', lb:'$ Returned Payments Recovered', type:'currency'},
+      ]},
+      { g: 'C4 — Payment Arrangements', items: [
+        {id:'C4a', lb:'# Payment Arrangements Entered', type:'count'},
+        {id:'C4b', lb:'# Payment Arrangements Kept (Paid as Agreed)', type:'count'},
+        {id:'C4c', lb:'# Payment Arrangements Broken', type:'count'},
+        {id:'C4d', lb:'$ Total Amount Under Payment Arrangement', type:'currency'},
+      ]},
+    ]
+  },
+
+  D: {
+    label: 'Accounts Receivable',
+    groups: [
+      { g: 'D1 — Days Sales Outstanding (DSO)', items: [
+        {id:'D1a', lb:'$ Total Accounts Receivable Balance', type:'currency'},
+        {id:'D1b', lb:'$ Average Daily Revenue', type:'currency'},
+      ]},
+      { g: 'D2 — AR Aging Buckets', items: [
+        {id:'D2a', lb:'$ Current (0–30 days)', type:'currency'},
+        {id:'D2b', lb:'$ 31–60 Days Past Due', type:'currency'},
+        {id:'D2c', lb:'$ 61–90 Days Past Due', type:'currency'},
+        {id:'D2d', lb:'$ 91–120 Days Past Due', type:'currency'},
+        {id:'D2e', lb:'$ 120+ Days Past Due', type:'currency'},
+        {id:'D2total', lb:'$ Total AR Balance (auto)', type:'currency', ro:true, calc:(d)=>['D2a','D2b','D2c','D2d','D2e'].reduce((s,k)=>s+(+d[k]||0),0)},
+      ]},
+      { g: 'D3 — Billing & Revenue', items: [
+        {id:'D3a', lb:'$ Total Revenue Billed', type:'currency'},
+        {id:'D3b', lb:'$ Credits / Adjustments Issued', type:'currency'},
+        {id:'D3c', lb:'# Billing Disputes Filed', type:'count'},
+        {id:'D3d', lb:'# Billing Disputes Resolved', type:'count'},
+        {id:'D3e', lb:'$ Amount in Dispute', type:'currency'},
+      ]},
+      { g: 'D4 — Collections Activity', items: [
+        {id:'D4a', lb:'# Accounts Sent to Internal Collections', type:'count'},
+        {id:'D4b', lb:'$ Amount Sent to Internal Collections', type:'currency'},
+        {id:'D4c', lb:'# Promises to Pay Received', type:'count'},
+        {id:'D4d', lb:'# Promises to Pay Kept', type:'count'},
+        {id:'D4e', lb:'# Accounts Sent Disconnect Notice', type:'count'},
+        {id:'D4f', lb:'# Accounts Disconnected (Non-Pay)', type:'count'},
+      ]},
+    ]
+  },
+
+  E: {
+    label: 'Write-Off',
+    groups: [
+      { g: 'E1 — Write-Off Volume', items: [
+        {id:'E1a', lb:'$ Total Amount Written Off', type:'currency'},
+        {id:'E1b', lb:'$ Total Revenue Billed (same period)', type:'currency'},
+        {id:'E1c', lb:'# Accounts Written Off', type:'count'},
+        {id:'E1d', lb:'$ Average Balance at Write-Off', type:'currency'},
+      ]},
+      { g: 'E2 — Write-Off by Reason', items: [
+        {id:'E2a', lb:'$ Written Off — Non-Pay (Credit Risk)', type:'currency'},
+        {id:'E2b', lb:'$ Written Off — Fraud', type:'currency'},
+        {id:'E2c', lb:'$ Written Off — Bankruptcy', type:'currency'},
+        {id:'E2d', lb:'$ Written Off — Other', type:'currency'},
+      ]},
+      { g: 'E3 — Write-Off Timing & Equipment', items: [
+        {id:'E3a', lb:'Average Days to Write-Off from First Delinquency', type:'days'},
+        {id:'E3b', lb:'# Accounts Written Off — Voluntary Churn', type:'count'},
+        {id:'E3c', lb:'# Accounts Written Off — Involuntary Churn', type:'count'},
+        {id:'E3d', lb:'# Accounts with Unreturned Equipment at Write-Off', type:'count'},
+        {id:'E3e', lb:'$ Equipment Value — Unreturned at Write-Off', type:'currency'},
+      ]},
+      { g: 'E4 — Post-Write-Off Internal Recovery', items: [
+        {id:'E4a', lb:'$ Recovered In-House After Write-Off', type:'currency'},
+        {id:'E4b', lb:'# Accounts Recovered In-House After Write-Off', type:'count'},
+      ]},
+    ]
+  },
+
+  F: {
+    label: 'Recovery',
+    groups: [
+      { g: 'F1 — Placement Overview', items: [
+        {id:'F1a', lb:'$ Total Placed to External Agencies', type:'currency'},
+        {id:'F1b', lb:'$ Total Recovered from External Agencies', type:'currency'},
+      ]},
+      { g: 'F2 — Tenure at Placement', items: [
+        {id:'F2a', lb:'$ Placed — 0–6 Months Since Write-Off', type:'currency'},
+        {id:'F2b', lb:'$ Placed — 7–12 Months Since Write-Off', type:'currency'},
+        {id:'F2c', lb:'$ Placed — 13–24 Months Since Write-Off', type:'currency'},
+        {id:'F2d', lb:'$ Placed — 25–36 Months Since Write-Off', type:'currency'},
+        {id:'F2e', lb:'$ Placed — 37+ Months Since Write-Off', type:'currency'},
+      ]},
+      { g: 'F3 — 1st Party (Primary) Agency', items: [
+        {id:'F3a', lb:'# Accounts Placed — 1st Party', type:'count'},
+        {id:'F3b', lb:'$ Placed — 1st Party', type:'currency'},
+        {id:'F3c', lb:'$ Recovered — 1st Party', type:'currency'},
+        {id:'F3d', lb:'$ Returned to Client — 1st Party', type:'currency'},
+        {id:'F3e', lb:'Commission Rate — 1st Party (%)', type:'pct'},
+      ]},
+      { g: 'F4 — 2nd Party (Secondary) Agency', items: [
+        {id:'F4a', lb:'# Accounts Placed — 2nd Party', type:'count'},
+        {id:'F4b', lb:'$ Placed — 2nd Party', type:'currency'},
+        {id:'F4c', lb:'$ Recovered — 2nd Party', type:'currency'},
+        {id:'F4d', lb:'$ Returned to Client — 2nd Party', type:'currency'},
+        {id:'F4e', lb:'Commission Rate — 2nd Party (%)', type:'pct'},
+      ]},
+      { g: 'F5 — 3rd Party (Tertiary) Agency', items: [
+        {id:'F5a', lb:'# Accounts Placed — 3rd Party', type:'count'},
+        {id:'F5b', lb:'$ Placed — 3rd Party', type:'currency'},
+        {id:'F5c', lb:'$ Recovered — 3rd Party', type:'currency'},
+        {id:'F5d', lb:'$ Returned to Client — 3rd Party', type:'currency'},
+        {id:'F5e', lb:'Commission Rate — 3rd Party (%)', type:'pct'},
+      ]},
+      { g: 'F6 — Warehouse / Legal Assignment', items: [
+        {id:'F6a', lb:'# Accounts Placed — Warehouse/Legal', type:'count'},
+        {id:'F6b', lb:'$ Placed — Warehouse/Legal', type:'currency'},
+        {id:'F6c', lb:'$ Recovered — Warehouse/Legal', type:'currency'},
+        {id:'F6d', lb:'$ Returned to Client — Warehouse/Legal', type:'currency'},
+        {id:'F6e', lb:'Commission Rate — Warehouse/Legal (%)', type:'pct'},
+      ]},
+      { g: 'F7 — Placement Timing', items: [
+        {id:'F7a', lb:'Average Days from Write-Off to 1st Placement', type:'days'},
+        {id:'F7b', lb:'Average Days from Write-Off to 2nd Placement', type:'days'},
+      ]},
+    ]
+  }
+};
+
+// ─────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────
+const S = {
+  profile: { code:'', name:'', entity:'', year:'2026' },
+  activePhase: 'A',
+  activeMonth: 'January',
+  data: {},   // { phase: { month: { fieldId: value } } }
+};
+
+// ─────────────────────────────────────────────
+// PROFILE
+// ─────────────────────────────────────────────
+function startEntry() {
+  const code = document.getElementById('profileCode').value.trim();
+  const name = document.getElementById('profileName').value.trim();
+  const err = document.getElementById('profileError');
+  if (!code) { err.textContent='Company Code is required.'; return; }
+  if (!name) { err.textContent='Contact Name is required.'; return; }
+  err.textContent='';
+  S.profile.code = code;
+  S.profile.name = name;
+  S.profile.entity = document.getElementById('profileEntity').value;
+  S.profile.year = document.getElementById('profileYear').value;
+  document.getElementById('navCompany').textContent = code;
+  loadDraft();
+  show('screenEntry');
+  hide('screenProfile');
+  renderPhaseTabs();
+  renderMonthBar();
+  renderPhase();
+}
+
+// ─────────────────────────────────────────────
+// RENDER
+// ─────────────────────────────────────────────
+function renderPhaseTabs() {
+  const container = document.getElementById('phaseTabs');
+  container.innerHTML = Object.entries(PHASES).map(([key, ph]) => {
+    const pct = phaseCompletion(key);
+    const badge = pct > 0 ? `<span class="badge">${pct}%</span>` : '';
+    return `<button class="phase-btn${key===S.activePhase?' active':''}" onclick="switchPhase('${key}')">${key}: ${ph.label}${badge}</button>`;
+  }).join('');
+}
+
+function renderMonthBar() {
+  const container = document.getElementById('monthBar');
+  container.innerHTML = MONTHS.map(m => {
+    const hasData = monthHasData(S.activePhase, m);
+    return `<button class="month-btn${m===S.activeMonth?' active':''}${hasData?' has-data':''}" onclick="switchMonth('${m}')">${m.substring(0,3)}<span class="dot"></span></button>`;
+  }).join('');
+}
+
+function renderPhase() {
+  const phase = PHASES[S.activePhase];
+  const phaseData = (S.data[S.activePhase] || {})[S.activeMonth] || {};
+
+  let html = '';
+  phase.groups.forEach(grp => {
+    html += `<div class="card"><div class="card-title">${grp.g}</div><table class="data-table">
+      <thead><tr><th style="width:70px">Ref</th><th>Field</th><th style="width:160px">Value</th></tr></thead><tbody>`;
+
+    grp.items.forEach(f => {
+      const val = f.ro ? (f.calc ? f.calc(phaseData) : '') : (phaseData[f.id] ?? '');
+      const prefix = f.type === 'currency' ? '$' : '';
+      const suffix = f.type === 'pct' ? '%' : (f.type === 'days' ? ' days' : '');
+
+      if (f.ro) {
+        const displayVal = val !== '' && val !== null ? Number(val).toLocaleString() : '—';
+        html += `<tr class="calc-row"><td class="ref-col">${f.id}</td><td>${f.lb}</td><td><span class="calc-val">${prefix}${displayVal}${suffix}</span></td></tr>`;
+      } else {
+        html += `<tr>
+          <td class="ref-col">${f.id}</td>
+          <td>${f.lb}${prefix ? ` <span style="color:var(--muted);font-size:12px;">(${prefix})</span>` : ''}</td>
+          <td><input class="num-input" type="number" min="0" step="${f.type==='pct'?'0.01':'1'}"
+            value="${val}" placeholder="—"
+            onchange="setVal('${S.activePhase}','${S.activeMonth}','${f.id}',this.value)"
+            onblur="refreshCalcs()" /></td>
+        </tr>`;
+      }
+    });
+
+    html += '</tbody></table></div>';
+  });
+
+  document.getElementById('phaseContent').innerHTML = html;
+  updateOverall();
+}
+
+// ─────────────────────────────────────────────
+// DATA MANAGEMENT
+// ─────────────────────────────────────────────
+function setVal(phase, month, fieldId, value) {
+  if (!S.data[phase]) S.data[phase] = {};
+  if (!S.data[phase][month]) S.data[phase][month] = {};
+  if (value === '' || value === null) {
+    delete S.data[phase][month][fieldId];
+  } else {
+    S.data[phase][month][fieldId] = parseFloat(value);
+  }
+  saveDraftSilent();
+}
+
+function refreshCalcs() {
+  renderPhase();
+  renderMonthBar();
+  renderPhaseTabs();
+}
+
+function switchPhase(p) {
+  S.activePhase = p;
+  renderPhaseTabs();
+  renderMonthBar();
+  renderPhase();
+}
+
+function switchMonth(m) {
+  S.activeMonth = m;
+  renderMonthBar();
+  renderPhase();
+}
+
+function monthHasData(phase, month) {
+  const d = (S.data[phase] || {})[month] || {};
+  return Object.keys(d).length > 0;
+}
+
+function phaseCompletion(phase) {
+  const ph = PHASES[phase];
+  let total = 0, filled = 0;
+  ph.groups.forEach(g => {
+    g.items.filter(f => !f.ro).forEach(f => {
+      MONTHS.forEach(m => {
+        total++;
+        const v = (S.data[phase] || {})[m] || {};
+        if (v[f.id] !== undefined && v[f.id] !== '') filled++;
+      });
+    });
+  });
+  return total === 0 ? 0 : Math.round((filled / total) * 100);
+}
+
+function updateOverall() {
+  let total = 0, filled = 0;
+  Object.keys(PHASES).forEach(p => {
+    PHASES[p].groups.forEach(g => {
+      g.items.filter(f => !f.ro).forEach(f => {
+        MONTHS.forEach(m => {
+          total++;
+          const v = (S.data[p] || {})[m] || {};
+          if (v[f.id] !== undefined && v[f.id] !== '') filled++;
+        });
+      });
+    });
+  });
+  const pct = total === 0 ? 0 : Math.round((filled / total) * 100);
+  document.getElementById('overallLabel').textContent = `Overall completion: ${pct}%`;
+  document.getElementById('overallBar').style.width = pct + '%';
+}
+
+// ─────────────────────────────────────────────
+// DRAFT (localStorage)
+// ─────────────────────────────────────────────
+function saveDraft() {
+  localStorage.setItem('trma_draft_' + S.profile.code, JSON.stringify(S.data));
+  const btn = document.querySelector('.btn-secondary');
+  const orig = btn.textContent;
+  btn.textContent = '✓ Saved!';
+  setTimeout(() => btn.textContent = orig, 1500);
+}
+
+function saveDraftSilent() {
+  if (S.profile.code) {
+    localStorage.setItem('trma_draft_' + S.profile.code, JSON.stringify(S.data));
+  }
+}
+
+function loadDraft() {
+  const saved = localStorage.getItem('trma_draft_' + S.profile.code);
+  if (saved) {
+    try { S.data = JSON.parse(saved); } catch(e) {}
+  }
+}
+
+// ─────────────────────────────────────────────
+// SUBMIT
+// ─────────────────────────────────────────────
+async function handleSubmit() {
+  const errEl = document.getElementById('submitError');
+  errEl.textContent = '';
+
+  // Check at least one field filled
+  let hasAny = false;
+  Object.values(S.data).forEach(phaseData => {
+    Object.values(phaseData).forEach(monthData => {
+      if (Object.keys(monthData).length > 0) hasAny = true;
+    });
+  });
+  if (!hasAny) { errEl.textContent = 'Please enter at least some data before submitting.'; return; }
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Submitting...';
+
+  const token = generateToken();
+
+  const payload = {
+    session_token: token,
+    company_code: S.profile.code,
+    contact_name: S.profile.name,
+    entity_type: S.profile.entity,
+    reporting_year: parseInt(S.profile.year),
+    upload_method: 'web_form',
+    data: S.data,
+    submitted_at: new Date().toISOString()
+  };
+
+  try {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/raw_submissions`, {
+      method: 'POST',
+      headers: {
+        'apikey': ANON_KEY,
+        'Authorization': `Bearer ${ANON_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (!r.ok) {
+      const errText = await r.text();
+      throw new Error(errText);
+    }
+
+    // Clear draft
+    localStorage.removeItem('trma_draft_' + S.profile.code);
+
+    // Show success
+    document.getElementById('successToken').textContent = token;
+    document.getElementById('reportsLink').href = `reports.html?token=${token}`;
+    window._submissionToken = token;
+    hide('screenEntry');
+    show('screenSuccess');
+
+  } catch(e) {
+    errEl.textContent = 'Submission failed: ' + (e.message || 'Please try again.');
+    btn.disabled = false;
+    btn.textContent = 'Submit Data';
+  }
+}
+
+function generateToken() {
+  const arr = new Uint8Array(16);
+  crypto.getRandomValues(arr);
+  return Array.from(arr).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+function copyToken() {
+  const t = document.getElementById('successToken').textContent;
+  navigator.clipboard.writeText(t).then(() => {
+    const btn = event.target;
+    btn.textContent = '✓ Copied!';
+    setTimeout(() => btn.textContent = '📋 Copy Token', 2000);
+  });
+}
+
+function show(id) { document.getElementById(id).classList.remove('hidden'); }
+function hide(id) { document.getElementById(id).classList.add('hidden'); }
+</script>
 </body>
 </html>
