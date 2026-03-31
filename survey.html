@@ -615,9 +615,9 @@ async function handleSubmit() {
     session_token: token,
     company_code: S.profile.code,
     entity_type: S.profile.entity,
-    reporting_year: parseInt(S.profile.year),
+    survey_year: parseInt(S.profile.year),
     upload_method: 'web_form',
-    data: S.data,
+    data_json: S.data,
     submitted_at: new Date().toISOString()
   };
 
