@@ -288,39 +288,52 @@ function showReports() {
   document.getElementById('pendingView').classList.add('hidden');
   document.getElementById('reportView').classList.remove('hidden');
 
-  // Summary stats
-  const uniqueTokens = new Set(allSubmissions.map(r => r.session_token));
-  const months = [...new Set(allSubmissions.map(r => r.reporting_month))].filter(Boolean).sort();
-  const phases = [...new Set(allSubmissions.map(r => r.phase))].filter(Boolean).sort();
+  const uniqueTokens = [...new Set(allSubmissions.map(r => r.session_token))];
+
+  // Extract all months and phases from data_json blobs
+  const monthSet = new Set();
+  const phaseSet = new Set();
+  let totalDataPoints = 0;
+
+  allSubmissions.forEach(row => {
+    const dj = row.data_json || {};
+    Object.entries(dj).forEach(([phase, monthMap]) => {
+      phaseSet.add(phase);
+      Object.entries(monthMap || {}).forEach(([month, fields]) => {
+        const vals = Object.values(fields || {}).filter(v => v !== '' && v !== null && v !== undefined);
+        if (vals.length > 0) {
+          monthSet.add(month);
+          totalDataPoints += vals.length;
+        }
+      });
+    });
+  });
+
+  const months = [...monthSet].sort((a,b) => MONTHS.indexOf(a) - MONTHS.indexOf(b));
+  const phases = [...phaseSet].sort();
 
   document.getElementById('reportMeta').textContent =
-    `Based on ${uniqueTokens.size} member submissions • Updated ${new Date().toLocaleDateString()}`;
+    `Based on ${uniqueTokens.length} member submissions • Updated ${new Date().toLocaleDateString()}`;
 
   document.getElementById('reportSummary').innerHTML = `
-    <div class="summary-card"><div class="val">${uniqueTokens.size}</div><div class="lbl">Members Participating</div></div>
+    <div class="summary-card"><div class="val">${uniqueTokens.length}</div><div class="lbl">Members Participating</div></div>
     <div class="summary-card"><div class="val">${months.length}</div><div class="lbl">Months of Data</div></div>
     <div class="summary-card"><div class="val">${phases.length}</div><div class="lbl">Phases Covered</div></div>
-    <div class="summary-card"><div class="val">${allSubmissions.length.toLocaleString()}</div><div class="lbl">Data Points</div></div>
+    <div class="summary-card"><div class="val">${totalDataPoints.toLocaleString()}</div><div class="lbl">Data Points</div></div>
   `;
 
-  // Month selector
+  // Month selector — use all standard months if any data exists, else show available
   const sel = document.getElementById('monthSelect');
-  sel.innerHTML = months.length
-    ? months.map(m => `<option value="${m}">${formatMonth(m)}</option>`).join('')
-    : '<option value="">No data yet</option>';
+  const displayMonths = months.length ? months : MONTHS;
+  sel.innerHTML = displayMonths.map(m => `<option value="${m}">${m}</option>`).join('');
 
-  // Phase tabs
-  document.getElementById('phaseTabs').innerHTML = phases.map(p =>
-    `<div class="phase-tab${p === activePhase ? ' active' : ''}" onclick="setPhase('${p}')">${p}: ${PHASE_NAMES[p] || p}</div>`
-  ).join('');
+  // Phase tabs — show all phases, highlight those with data
+  document.getElementById('phaseTabs').innerHTML = Object.entries(PHASE_NAMES).map(([p, name]) => {
+    const hasData = phaseSet.has(p);
+    return `<div class="phase-tab${p === activePhase ? ' active' : ''}${!hasData ? ' style="opacity:0.5"' : ''}" onclick="setPhase('${p}')">${p}: ${name}</div>`;
+  }).join('');
 
   renderMetrics();
-}
-
-function formatMonth(m) {
-  if (!m) return '';
-  const [y, mo] = m.split('-');
-  return `${MONTHS[parseInt(mo,10)-1]} ${y}`;
 }
 
 function setPhase(p) {
@@ -330,25 +343,34 @@ function setPhase(p) {
   renderMetrics();
 }
 
-function getVal(submissions, month, fieldId) {
-  return submissions
-    .filter(r => r.reporting_month === month && r.field_id === fieldId)
-    .map(r => parseFloat(r.field_value))
-    .filter(v => !isNaN(v));
+// Get a field value from a single submission's data_json for a given phase/month/fieldId
+function getFieldVal(row, phase, month, fieldId) {
+  const v = ((row.data_json || {})[phase] || {})[month]?.[fieldId];
+  if (v === undefined || v === null || v === '') return null;
+  const n = parseFloat(v);
+  return isNaN(n) ? null : n;
 }
 
-function calcMetric(formula, submissions, month) {
-  // Simple ratio: sum(numerator fields) / sum(denominator fields)
-  const nFields = formula.n.split('+');
-  const dFields = formula.d.split('+');
+// Calculate a metric for one member submission for a given month
+function calcMetric(formula, row, month) {
+  const phase = formula.p;
+  const nFields = formula.n.split('+').map(f => f.trim());
+  const dFields = formula.d.split('+').map(f => f.trim());
 
-  const nVals = nFields.flatMap(f => getVal(submissions, month, f.trim()));
-  const dVals = dFields.flatMap(f => getVal(submissions, month, f.trim()));
-
-  if (!nVals.length || !dVals.length) return null;
-
+  // Numerator: sum all specified fields
+  const nVals = nFields.map(f => getFieldVal(row, phase, month, f)).filter(v => v !== null);
+  if (nVals.length === 0) return null;
   const nSum = nVals.reduce((a, b) => a + b, 0);
-  const dSum = dVals.reduce((a, b) => a + b, 0);
+
+  // Denominator: if '1.0' treat as 1 (direct value), otherwise sum fields
+  let dSum = 1;
+  if (dFields.length === 1 && dFields[0] === '1.0') {
+    dSum = 1;
+  } else {
+    const dVals = dFields.map(f => getFieldVal(row, phase, month, f)).filter(v => v !== null);
+    if (dVals.length === 0) return null;
+    dSum = dVals.reduce((a, b) => a + b, 0);
+  }
 
   if (dSum === 0) return null;
   return nSum / dSum;
@@ -358,7 +380,7 @@ function fmt(val, type) {
   if (val === null || val === undefined) return '—';
   if (type === 'pct') return (val * 100).toFixed(1) + '%';
   if (type === 'days') return val.toFixed(1) + ' days';
-  return val.toFixed(2);
+  return val.toLocaleString(undefined, {maximumFractionDigits: 2});
 }
 
 function renderMetrics() {
@@ -370,15 +392,13 @@ function renderMetrics() {
     return;
   }
 
-  // Group by group label
   const groups = {};
   phaseFormulas.forEach(f => {
     if (!groups[f.gl]) groups[f.gl] = [];
     groups[f.gl].push(f);
   });
 
-  const uniqueTokens = [...new Set(allSubmissions.map(r => r.session_token))];
-  const participantCount = uniqueTokens.size;
+  const participantCount = allSubmissions.length;
 
   let html = `
     <table class="metrics-table">
@@ -398,11 +418,10 @@ function renderMetrics() {
   Object.entries(groups).forEach(([groupLabel, formulas]) => {
     html += `<tr><td colspan="6" class="metric-group">${groupLabel}</td></tr>`;
     formulas.forEach(formula => {
-      // Compute per-member values for avg/median/min/max
-      const memberVals = uniqueTokens.map(token => {
-        const memberSubs = allSubmissions.filter(r => r.session_token === token);
-        return calcMetric(formula, memberSubs, month);
-      }).filter(v => v !== null);
+      // One value per member submission
+      const memberVals = allSubmissions
+        .map(row => calcMetric(formula, row, month))
+        .filter(v => v !== null);
 
       let avg = null, med = null, lo = null, hi = null;
       if (memberVals.length > 0) {
