@@ -97,10 +97,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
       <input type="text" id="profileCode" placeholder="e.g. TRMA-001" />
     </div>
     <div class="form-group">
-      <label>Contact Name *</label>
-      <input type="text" id="profileName" placeholder="Your full name" />
-    </div>
-    <div class="form-group">
       <label>Entity Type</label>
       <select id="profileEntity">
         <option value="">-- Select --</option>
@@ -427,13 +423,10 @@ const S = {
 // ─────────────────────────────────────────────
 function startEntry() {
   const code = document.getElementById('profileCode').value.trim();
-  const name = document.getElementById('profileName').value.trim();
   const err = document.getElementById('profileError');
   if (!code) { err.textContent='Company Code is required.'; return; }
-  if (!name) { err.textContent='Contact Name is required.'; return; }
   err.textContent='';
   S.profile.code = code;
-  S.profile.name = name;
   S.profile.entity = document.getElementById('profileEntity').value;
   S.profile.year = document.getElementById('profileYear').value;
   document.getElementById('navCompany').textContent = code;
@@ -621,7 +614,6 @@ async function handleSubmit() {
   const payload = {
     session_token: token,
     company_code: S.profile.code,
-    contact_name: S.profile.name,
     entity_type: S.profile.entity,
     reporting_year: parseInt(S.profile.year),
     upload_method: 'web_form',
