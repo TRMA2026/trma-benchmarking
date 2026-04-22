@@ -23,10 +23,14 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
 
-.header { background: var(--navy); color: #fff; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; }
+.header { background: var(--navy); color: #fff; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
 .header h1 { font-size: 20px; font-weight: 600; }
+.header-right { display: flex; align-items: center; gap: 16px; }
 .header a { color: #a8c8e8; text-decoration: none; font-size: 14px; }
 .header a:hover { color: #fff; }
+.header-user { font-size: 12px; color: #7aabda; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.18); border-radius: 4px; padding: 4px 10px; }
+.logout-link { font-size: 12px; color: #a8c8e8; background: none; border: none; cursor: pointer; text-decoration: underline; padding: 0; }
+.logout-link:hover { color: #fff; }
 
 .container { max-width: 960px; margin: 0 auto; padding: 24px; }
 
@@ -57,9 +61,9 @@ input[type="file"] { display: none; }
 .summary-item .label { font-size: 12px; color: var(--muted); margin-top: 2px; }
 
 .phase-detail { border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 12px; overflow: hidden; }
-.phase-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #f8f9fa; cursor: pointer; user-select: none; }
-.phase-header:hover { background: #f0f1f2; }
-.phase-header h3 { font-size: 14px; color: var(--navy); }
+.phase-header-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #f8f9fa; cursor: pointer; user-select: none; }
+.phase-header-row:hover { background: #f0f1f2; }
+.phase-header-row h3 { font-size: 14px; color: var(--navy); }
 .phase-badge { font-size: 12px; padding: 2px 10px; border-radius: 12px; font-weight: 500; }
 .phase-badge.good { background: #e8f5e9; color: #2e7d32; }
 .phase-badge.partial { background: #fff3e0; color: #e65100; }
@@ -75,8 +79,12 @@ input[type="file"] { display: none; }
 .phase-body td.val.empty { color: #ccc; }
 
 .profile-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
-.profile-fields label { font-size: 13px; font-weight: 500; color: var(--navy); display: block; margin-bottom: 4px; }
-.profile-fields select { width: 100%; padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; background: #fff; }
+@media (max-width: 600px) { .profile-fields { grid-template-columns: 1fr; } }
+.profile-fields label { font-size: 13px; font-weight: 600; color: var(--navy); display: block; margin-bottom: 4px; }
+.profile-fields select { width: 100%; padding: 9px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; background: #fff; }
+.profile-fields select:focus { outline: none; border-color: var(--blue); }
+
+.field-error { border-color: var(--red) !important; }
 
 .btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 24px; border: none; border-radius: 6px; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.15s; }
 .btn-primary { background: var(--blue); color: #fff; }
@@ -102,14 +110,30 @@ input[type="file"] { display: none; }
 .result-box { text-align: center; padding: 40px 24px; }
 .result-box svg { width: 64px; height: 64px; margin-bottom: 16px; }
 .result-box h2 { color: var(--green); margin-bottom: 8px; }
-.result-box p { color: var(--muted); max-width: 400px; margin: 0 auto; }
+.result-box p { color: var(--muted); max-width: 460px; margin: 0 auto 24px; }
 </style>
 </head>
 <body>
 
+<!-- Auth check -->
+<script>
+  if (sessionStorage.getItem('trma_auth') !== 'true') {
+    window.location.href = 'login.html';
+  }
+  function logout() {
+    sessionStorage.removeItem('trma_auth');
+    sessionStorage.removeItem('trma_user');
+    window.location.href = 'login.html';
+  }
+</script>
+
 <div class="header">
   <h1>TRMA Benchmarking — Upload Data</h1>
-  <a href="index.html">&larr; Back to Dashboard</a>
+  <div class="header-right">
+    <span class="header-user" id="headerUser"></span>
+    <a href="index.html">← Back to Dashboard</a>
+    <button class="logout-link" onclick="logout()">Sign Out</button>
+  </div>
 </div>
 
 <div class="container">
@@ -155,25 +179,11 @@ input[type="file"] { display: none; }
   <!-- STEP 3: Confirm & Submit -->
   <div id="step3" class="card hidden">
     <h2>Company Profile &amp; Submit</h2>
-    <p>Enter the company code assigned by TRMA and your entity details. Individual company data is never shared with other participants.</p>
-
-    <div style="margin-bottom:20px">
-      <label for="companyCode" style="font-size:13px;font-weight:600;color:#1B3A5C;display:block;margin-bottom:4px">Company Code <span style="color:#dc3545">*</span></label>
-      <input type="text" id="companyCode" placeholder="e.g. TRMA-001" style="width:100%;max-width:260px;padding:9px 14px;border:1px solid #dee2e6;border-radius:6px;font-size:15px;font-family:'SF Mono','Consolas',monospace;letter-spacing:0.5px">
-      <div style="font-size:12px;color:#6c757d;margin-top:4px">Enter the code provided to you by the TRMA Executive Director.</div>
-    </div>
+    <p>Select your entity type and the reporting month before submitting. Your data is submitted anonymously — no company name is stored.</p>
 
     <div class="profile-fields">
       <div>
-        <label for="country">Country</label>
-        <select id="country">
-          <option value="">— Select —</option>
-          <option value="US">United States</option>
-          <option value="CA">Canada</option>
-        </select>
-      </div>
-      <div>
-        <label for="entityType">Entity Type</label>
+        <label for="entityType">Entity Type <span style="color:var(--red)">*</span></label>
         <select id="entityType">
           <option value="">— Select —</option>
           <option value="Fixed">Fixed Services</option>
@@ -182,10 +192,35 @@ input[type="file"] { display: none; }
           <option value="Other">Other</option>
         </select>
       </div>
+      <div>
+        <label for="reportingMonth">Reporting Month <span style="color:var(--red)">*</span></label>
+        <select id="reportingMonth">
+          <option value="">— Select a Month —</option>
+          <option>January</option>
+          <option>February</option>
+          <option>March</option>
+          <option>April</option>
+          <option>May</option>
+          <option>June</option>
+          <option>July</option>
+          <option>August</option>
+          <option>September</option>
+          <option>October</option>
+          <option>November</option>
+          <option>December</option>
+        </select>
+      </div>
+      <div>
+        <label for="reportingYear">Reporting Year <span style="color:var(--red)">*</span></label>
+        <select id="reportingYear">
+          <option>2025</option>
+          <option selected>2026</option>
+        </select>
+      </div>
     </div>
 
     <div class="alert alert-info">
-      Your company code is visible only to TRMA administration. Benchmark reports show aggregated data only — no individual company data is ever shared with other participants.
+      Your submission is linked to your member login. Benchmark reports show aggregated data only — no individual company data is ever shared with other participants.
     </div>
 
     <div id="submitError" class="alert alert-error hidden"></div>
@@ -203,20 +238,10 @@ input[type="file"] { display: none; }
         <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
       </svg>
       <h2>Submission Complete!</h2>
-      <p>Your benchmarking data has been received. It will be combined with other members' submissions to generate industry benchmarks.</p>
-
-      <div style="background:#e8f5e9;border:1px solid #c8e6c9;border-radius:8px;padding:16px 20px;margin:20px auto;max-width:500px;text-align:left">
-        <div style="font-size:13px;font-weight:600;color:#2e7d32;margin-bottom:6px">Your Report Access Token</div>
-        <div style="font-size:12px;color:#555;margin-bottom:10px">Save this token — you'll need it to access benchmark reports. It is your only key to view results.</div>
-        <div style="display:flex;gap:8px;align-items:center">
-          <input type="text" id="tokenValue" readonly style="flex:1;padding:8px 12px;border:1px solid #c8e6c9;border-radius:6px;font-family:'SF Mono','Consolas',monospace;font-size:13px;background:#fff;color:#1B3A5C;letter-spacing:0.5px">
-          <button onclick="copyToken()" id="copyBtn" style="padding:8px 14px;border:1px solid #c8e6c9;border-radius:6px;background:#fff;cursor:pointer;font-size:12px;font-weight:500;color:#2e7d32;white-space:nowrap">Copy</button>
-        </div>
-      </div>
-
-      <div class="actions" style="justify-content:center;margin-top:24px">
-        <button class="btn btn-primary" id="viewReportsBtn" onclick="goToReports()">View Reports</button>
-        <button class="btn btn-secondary" onclick="window.location.href='index.html'">Return to Portal</button>
+      <p>Your benchmarking data has been received. Reports will be available once 8 members have submitted. Just log back in and click View Reports — no token needed.</p>
+      <div class="actions" style="justify-content:center;">
+        <a href="reports.html" class="btn btn-primary">📊 View Reports</a>
+        <a href="index.html" class="btn btn-secondary">← Back to Dashboard</a>
       </div>
     </div>
   </div>
@@ -241,8 +266,14 @@ const PHASE_MAP = {
   'F': { match: /phase\s*f|recovery/i, name: 'Recovery' },
 };
 
-let parsedData = {};   // { ref_code: { Jan: val, Feb: val, ... } }
-let phaseSummary = {}; // { A: { fields: 12, filled: 8 }, ... }
+let parsedData = {};
+let phaseSummary = {};
+
+// Set username in header
+window.addEventListener('DOMContentLoaded', () => {
+  const user = sessionStorage.getItem('trma_user');
+  if (user) document.getElementById('headerUser').textContent = '👤 ' + user;
+});
 
 // ============================================================
 // DRAG & DROP + FILE INPUT
@@ -294,20 +325,17 @@ function parseWorkbook(data) {
   phaseSummary = {};
 
   for (const sheetName of wb.SheetNames) {
-    // Determine which phase this sheet belongs to
     let phaseCode = null;
     for (const [code, cfg] of Object.entries(PHASE_MAP)) {
       if (cfg.match.test(sheetName)) { phaseCode = code; break; }
     }
-    if (!phaseCode) continue; // Skip instruction sheets etc.
+    if (!phaseCode) continue;
 
     const ws = wb.Sheets[sheetName];
     const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
 
-    // Find the header row (contains "Ref" and "January")
-    let headerRow = -1;
-    let refCol = -1;
-    let monthCols = {};
+    let headerRow = -1, refCol = -1;
+    const monthCols = {};
 
     for (let r = 0; r < Math.min(rows.length, 10); r++) {
       const row = rows[r];
@@ -317,12 +345,9 @@ function parseWorkbook(data) {
         if (val === 'ref') refCol = c;
         if (val === 'january') {
           headerRow = r;
-          // Map month columns
           for (let m = 0; m < 12; m++) {
             const monthVal = String(row[c + m] || '').trim();
-            if (MONTHS.includes(monthVal)) {
-              monthCols[MONTHS[m]] = c + m;
-            }
+            if (MONTHS.includes(monthVal)) monthCols[MONTHS[m]] = c + m;
           }
           break;
         }
@@ -332,18 +357,13 @@ function parseWorkbook(data) {
 
     if (headerRow < 0 || refCol < 0) continue;
 
-    let fieldsFound = 0;
-    let fieldsFilled = 0;
+    let fieldsFound = 0, fieldsFilled = 0;
 
-    // Parse data rows
     for (let r = headerRow + 1; r < rows.length; r++) {
       const row = rows[r];
       if (!row) continue;
-
       const ref = String(row[refCol] || '').trim();
-      if (!ref || ref.length > 10) continue; // Skip subgroup headers
-
-      // Check if this looks like a valid ref code
+      if (!ref || ref.length > 10) continue;
       if (!/^[\d]+[a-z]?$|^[\d]+\.[\d]+$/.test(ref)) continue;
 
       fieldsFound++;
@@ -363,12 +383,8 @@ function parseWorkbook(data) {
             fieldData[month] = 'NA';
           } else {
             const num = parseFloat(str.replace(/[$,%]/g, ''));
-            if (!isNaN(num)) {
-              fieldData[month] = num;
-              hasAnyData = true;
-            } else {
-              fieldData[month] = null;
-            }
+            if (!isNaN(num)) { fieldData[month] = num; hasAnyData = true; }
+            else fieldData[month] = null;
           }
         }
       }
@@ -381,7 +397,7 @@ function parseWorkbook(data) {
       name: PHASE_MAP[phaseCode].name,
       fields: fieldsFound,
       filled: fieldsFilled,
-      sheetName: sheetName
+      sheetName
     };
   }
 
@@ -405,14 +421,8 @@ function setStep(num) {
   }
 }
 
-function goToStep2() {
-  renderSummary();
-  setStep(2);
-}
-
-function goToStep3() {
-  setStep(3);
-}
+function goToStep2() { renderSummary(); setStep(2); }
+function goToStep3() { setStep(3); }
 
 function resetUpload() {
   parsedData = {};
@@ -430,13 +440,11 @@ function renderSummary() {
   const grid = document.getElementById('summaryGrid');
   const details = document.getElementById('phaseDetails');
 
-  // Top-level counts
   const totalFields = Object.values(phaseSummary).reduce((s, p) => s + p.fields, 0);
   const totalFilled = Object.values(phaseSummary).reduce((s, p) => s + p.filled, 0);
   const totalPhases = Object.keys(phaseSummary).length;
-  const totalDataPoints = Object.values(parsedData).reduce((sum, months) => {
-    return sum + Object.values(months).filter(v => v !== null && v !== 'NA').length;
-  }, 0);
+  const totalDataPoints = Object.values(parsedData).reduce((sum, months) =>
+    sum + Object.values(months).filter(v => v !== null && v !== 'NA').length, 0);
 
   grid.innerHTML = `
     <div class="summary-item"><div class="count">${totalPhases}</div><div class="label">Phases Found</div></div>
@@ -445,16 +453,13 @@ function renderSummary() {
     <div class="summary-item"><div class="count">${totalDataPoints.toLocaleString()}</div><div class="label">Data Points</div></div>
   `;
 
-  // Phase-by-phase details
   let detailsHTML = '';
   for (const [code, info] of Object.entries(phaseSummary).sort((a, b) => a[0].localeCompare(b[0]))) {
     const pct = info.fields > 0 ? Math.round((info.filled / info.fields) * 100) : 0;
     const badgeClass = pct >= 80 ? 'good' : pct > 0 ? 'partial' : 'empty';
     const badgeText = pct >= 80 ? `${pct}% complete` : pct > 0 ? `${pct}% partial` : 'No data';
 
-    // Build field table
     const phaseRefs = Object.keys(parsedData).filter(ref => {
-      // Match refs to phases based on number ranges
       const num = parseFloat(ref);
       if (code === 'A') return num >= 1 && num < 20;
       if (code === 'B') return num >= 20 && num < 30;
@@ -468,28 +473,19 @@ function renderSummary() {
     let tableRows = '';
     for (const ref of phaseRefs) {
       const months = parsedData[ref];
-      const filledMonths = Object.entries(months)
-        .filter(([, v]) => v !== null)
-        .map(([m, v]) => {
-          if (v === 'NA') return `<span style="color:#999">NA</span>`;
-          if (typeof v === 'number') return v.toLocaleString();
-          return v;
-        });
-
       const firstThree = MONTHS.slice(0, 3).map(m => {
         const v = months[m];
         if (v === null) return '<td class="val empty">—</td>';
         if (v === 'NA') return '<td class="val" style="color:#999">NA</td>';
         return `<td class="val has-data">${typeof v === 'number' ? v.toLocaleString() : v}</td>`;
       }).join('');
-
       const filledCount = Object.values(months).filter(v => v !== null && v !== 'NA').length;
       tableRows += `<tr><td class="ref">${ref}</td>${firstThree}<td class="val" style="color:var(--muted)">${filledCount}/12</td></tr>`;
     }
 
     detailsHTML += `
       <div class="phase-detail">
-        <div class="phase-header" onclick="this.nextElementSibling.classList.toggle('open')">
+        <div class="phase-header-row" onclick="this.nextElementSibling.classList.toggle('open')">
           <h3>Phase ${code}: ${info.name}</h3>
           <span class="phase-badge ${badgeClass}">${badgeText} &middot; ${info.filled}/${info.fields} fields</span>
         </div>
@@ -516,22 +512,35 @@ async function submitData() {
   const errorEl = document.getElementById('submitError');
   errorEl.classList.add('hidden');
 
+  const entityType     = document.getElementById('entityType').value;
+  const reportingMonth = document.getElementById('reportingMonth').value;
+  const reportingYear  = document.getElementById('reportingYear').value;
+
+  // Validate required fields
+  let hasError = false;
+  if (!entityType) {
+    document.getElementById('entityType').classList.add('field-error');
+    hasError = true;
+  } else {
+    document.getElementById('entityType').classList.remove('field-error');
+  }
+  if (!reportingMonth) {
+    document.getElementById('reportingMonth').classList.add('field-error');
+    hasError = true;
+  } else {
+    document.getElementById('reportingMonth').classList.remove('field-error');
+  }
+  if (hasError) {
+    errorEl.textContent = 'Please select both Entity Type and Reporting Month before submitting.';
+    errorEl.classList.remove('hidden');
+    return;
+  }
+
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span> Submitting...';
 
-  const companyCode = document.getElementById('companyCode').value.trim();
-  if (!companyCode) {
-    errorEl.textContent = 'Company code is required. Enter the code provided by the TRMA Executive Director.';
-    errorEl.classList.remove('hidden');
-    btn.disabled = false;
-    btn.innerHTML = 'Submit Data';
-    document.getElementById('companyCode').style.borderColor = '#dc3545';
-    return;
-  }
-  document.getElementById('companyCode').style.borderColor = '#dee2e6';
-
-  const country = document.getElementById('country').value || null;
-  const entityType = document.getElementById('entityType').value || null;
+  // Use logged-in username as session token and company code
+  const username = sessionStorage.getItem('trma_user') || 'UNKNOWN';
 
   const phasesIncluded = Object.keys(phaseSummary).sort();
   const fieldCount = Object.values(parsedData).filter(months =>
@@ -539,13 +548,16 @@ async function submitData() {
   ).length;
 
   const payload = {
-    company_code: companyCode,
-    country: country,
-    entity_type: entityType,
-    data_json: parsedData,
-    upload_method: 'spreadsheet',
-    phases_included: phasesIncluded,
-    field_count: fieldCount,
+    session_token:    username,
+    company_code:     username,
+    entity_type:      entityType,
+    reporting_month:  reportingMonth,
+    survey_year:      parseInt(reportingYear),
+    data_json:        parsedData,
+    upload_method:    'spreadsheet',
+    phases_included:  phasesIncluded,
+    field_count:      fieldCount,
+    submitted_at:     new Date().toISOString()
   };
 
   try {
@@ -555,7 +567,7 @@ async function submitData() {
         'apikey': ANON_KEY,
         'Authorization': `Bearer ${ANON_KEY}`,
         'Content-Type': 'application/json',
-        'Prefer': 'return=representation'
+        'Prefer': 'return=minimal'
       },
       body: JSON.stringify(payload)
     });
@@ -565,11 +577,6 @@ async function submitData() {
       throw new Error(`Server returned ${resp.status}: ${errText}`);
     }
 
-    const result = await resp.json();
-    const token = result[0]?.session_token || 'unknown';
-
-    document.getElementById('tokenValue').value = token;
-    window._submissionToken = token;
     setStep(4);
 
   } catch (err) {
@@ -579,21 +586,6 @@ async function submitData() {
     btn.disabled = false;
     btn.innerHTML = 'Submit Data';
   }
-}
-
-function copyToken() {
-  const input = document.getElementById('tokenValue');
-  input.select();
-  navigator.clipboard.writeText(input.value).then(() => {
-    const btn = document.getElementById('copyBtn');
-    btn.textContent = 'Copied!';
-    setTimeout(() => btn.textContent = 'Copy', 2000);
-  });
-}
-
-function goToReports() {
-  const token = window._submissionToken || document.getElementById('tokenValue').value;
-  window.location.href = `reports.html?token=${encodeURIComponent(token)}`;
 }
 </script>
 </body>
