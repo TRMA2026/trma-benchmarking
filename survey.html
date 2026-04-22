@@ -108,26 +108,37 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 <div id="screenProfile" class="container">
   <div class="profile-card card">
     <div class="card-title">👤 Member Profile</div>
-    <p style="color:var(--muted);font-size:13px;margin-bottom:20px;">Enter your company details before submitting data. Contact <a href="mailto:tclark@trmanet.org" style="color:var(--blue);">tclark@trmanet.org</a> to receive your Company Code.</p>
+    <p style="color:var(--muted);font-size:13px;margin-bottom:20px;">Select your entity type, reporting month, and year before entering data.</p>
     <div class="form-group">
-      <label>Company Code *</label>
-      <input type="text" id="profileCode" placeholder="e.g. TRMA-001" />
-    </div>
-    <div class="form-group">
-      <label>Entity Type</label>
+      <label>Entity Type *</label>
       <select id="profileEntity">
         <option value="">-- Select --</option>
-        <option>CLEC</option>
-        <option>ILEC</option>
-        <option>Cable / MSO</option>
-        <option>Wireless</option>
-        <option>VoIP / OTT</option>
-        <option>ISP</option>
+        <option>Fixed Services</option>
+        <option>Wireless Carrier</option>
+        <option>Cable / Broadband</option>
         <option>Other</option>
       </select>
     </div>
     <div class="form-group">
-      <label>Reporting Year</label>
+      <label>Reporting Month *</label>
+      <select id="profileMonth">
+        <option value="">-- Select a Month --</option>
+        <option>January</option>
+        <option>February</option>
+        <option>March</option>
+        <option>April</option>
+        <option>May</option>
+        <option>June</option>
+        <option>July</option>
+        <option>August</option>
+        <option>September</option>
+        <option>October</option>
+        <option>November</option>
+        <option>December</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Reporting Year *</label>
       <select id="profileYear">
         <option>2025</option>
         <option selected>2026</option>
@@ -454,14 +465,24 @@ const S = {
 // PROFILE
 // ─────────────────────────────────────────────
 function startEntry() {
-  const code = document.getElementById('profileCode').value.trim();
-  const err = document.getElementById('profileError');
-  if (!code) { err.textContent='Company Code is required.'; return; }
-  err.textContent='';
-  S.profile.code = code;
-  S.profile.entity = document.getElementById('profileEntity').value;
-  S.profile.year = document.getElementById('profileYear').value;
-  document.getElementById('navCompany').textContent = code;
+  const entity = document.getElementById('profileEntity').value;
+  const month  = document.getElementById('profileMonth').value;
+  const err    = document.getElementById('profileError');
+
+  if (!entity) { err.textContent = 'Please select an Entity Type.'; return; }
+  if (!month)  { err.textContent = 'Please select a Reporting Month.'; return; }
+  err.textContent = '';
+
+  // Use the logged-in username as the company code
+  const username = sessionStorage.getItem('trma_user') || 'UNKNOWN';
+  S.profile.code   = username;
+  S.profile.entity = entity;
+  S.profile.year   = document.getElementById('profileYear').value;
+
+  // Pre-set the active month to what they selected
+  S.activeMonth = month;
+
+  document.getElementById('navCompany').textContent = username;
   loadDraft();
   show('screenEntry');
   hide('screenProfile');
