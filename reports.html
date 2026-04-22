@@ -24,22 +24,22 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
 
 .header { background: var(--navy); color: #fff; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
 .header h1 { font-size: 20px; font-weight: 600; }
+.header-right { display: flex; align-items: center; gap: 16px; }
 .header a { color: #a8c8e8; text-decoration: none; font-size: 14px; }
 .header a:hover { color: #fff; }
+.header-user { font-size: 12px; color: #7aabda; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.18); border-radius: 4px; padding: 4px 10px; }
+.logout-link { font-size: 12px; color: #a8c8e8; background: none; border: none; cursor: pointer; text-decoration: underline; padding: 0; }
+.logout-link:hover { color: #fff; }
 
 .container { max-width: 1000px; margin: 0 auto; padding: 24px; }
 .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; margin-bottom: 20px; }
 
-/* Token gate */
-.gate-wrapper { max-width: 480px; margin: 60px auto; }
-.gate-wrapper h2 { color: var(--navy); margin-bottom: 8px; text-align: center; font-size: 22px; }
-.gate-subtitle { text-align: center; color: var(--muted); font-size: 14px; margin-bottom: 24px; }
-.gate-input-row { display: flex; gap: 8px; }
-.gate-input-row input { flex: 1; padding: 10px 14px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 15px; font-family: monospace; }
-.gate-input-row input:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(33,118,188,0.15); }
-.gate-error { color: var(--red); font-size: 13px; margin-top: 8px; min-height: 20px; }
+/* Loading screen */
+.loading-wrapper { max-width: 480px; margin: 80px auto; text-align: center; }
+.loading-wrapper .spinner-lg { display: inline-block; width: 40px; height: 40px; border: 4px solid var(--light-blue); border-top-color: var(--blue); border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 16px; }
+.loading-wrapper p { color: var(--muted); font-size: 15px; }
 
-/* Threshold / pending screen */
+/* Pending screen */
 .pending-wrapper { max-width: 560px; margin: 60px auto; text-align: center; }
 .pending-icon { font-size: 56px; margin-bottom: 16px; }
 .pending-wrapper h2 { color: var(--navy); font-size: 22px; margin-bottom: 10px; }
@@ -95,27 +95,33 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
 </head>
 <body>
 
+<!-- Auth check -->
+<script>
+  if (sessionStorage.getItem('trma_auth') !== 'true') {
+    window.location.href = 'login.html';
+  }
+  function logout() {
+    sessionStorage.removeItem('trma_auth');
+    sessionStorage.removeItem('trma_user');
+    window.location.href = 'login.html';
+  }
+</script>
+
 <div class="header">
   <h1>📊 TRMA Benchmarking — Reports</h1>
-  <a href="index.html">← Back to Dashboard</a>
+  <div class="header-right">
+    <span class="header-user" id="headerUser"></span>
+    <a href="index.html">← Dashboard</a>
+    <button class="logout-link" onclick="logout()">Sign Out</button>
+  </div>
 </div>
 
 <div class="container">
 
-  <!-- TOKEN GATE -->
-  <div id="gateView" class="gate-wrapper card">
-    <h2>🔐 Member Access</h2>
-    <p class="gate-subtitle">Enter the session token you received when you submitted your data.</p>
-    <div class="gate-input-row">
-      <input type="text" id="tokenInput" placeholder="e.g. a1b2c3d4-e5f6-..." autocomplete="off" />
-      <button class="btn btn-primary" onclick="validateToken()">
-        <span id="loginBtnText">View Reports</span>
-      </button>
-    </div>
-    <div class="gate-error" id="gateError"></div>
-    <p style="margin-top:18px;font-size:13px;color:var(--muted);text-align:center;">
-      Lost your token? Email <a href="mailto:tclark@trmanet.org" style="color:var(--blue);">tclark@trmanet.org</a>
-    </p>
+  <!-- LOADING -->
+  <div id="loadingView" class="loading-wrapper">
+    <div class="spinner-lg"></div>
+    <p>Loading your benchmarking data…</p>
   </div>
 
   <!-- PENDING: NOT ENOUGH SUBMISSIONS YET -->
@@ -135,14 +141,14 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
 
     <div class="pending-note">
       <strong>📬 What happens when we hit 8?</strong>
-      Your token will automatically unlock the full report — no re-registration needed.
-      You'll be able to view aggregated industry benchmarks across all participating companies.
+      Just log back in and return to this page — you'll automatically see the full report.
+      No token or re-registration needed.
       <br><br>
       Questions? Contact <a href="mailto:tclark@trmanet.org" style="color:var(--blue);">tclark@trmanet.org</a>
     </div>
 
     <div style="margin-top:24px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
-      <button class="btn btn-secondary" onclick="checkAgain()">🔄 Check Again</button>
+      <button class="btn btn-secondary" onclick="loadReports()">🔄 Check Again</button>
       <a href="index.html" class="btn btn-secondary">← Back to Dashboard</a>
     </div>
   </div>
@@ -151,10 +157,9 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
   <div id="reportView" class="hidden">
     <div class="report-header">
       <div>
-        <h2>Industry Benchmark Report</h2>
+        <h2>Industry Benchmark Report — Phase E: Write-Off</h2>
         <div class="report-meta" id="reportMeta"></div>
       </div>
-      <button class="btn btn-secondary" onclick="location.reload()">Logout</button>
     </div>
 
     <div class="summary-grid" id="reportSummary"></div>
@@ -164,8 +169,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
       <select id="monthSelect" onchange="renderMetrics()"></select>
     </div>
 
-    <div class="phase-tabs" id="phaseTabs"></div>
-    <div class="card" style="border-top-left-radius:0;border-top-right-radius:0">
+    <div class="card">
       <div id="metricsContainer"></div>
     </div>
   </div>
@@ -177,197 +181,126 @@ const SUPABASE_URL = 'https://hktzvlkrimpfreeoehsi.supabase.co';
 const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhrdHp2bGtyaW1wZnJlZW9laHNpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MjQwNTEsImV4cCI6MjA5MDIwMDA1MX0.1bYxe1z-BFw4N9kvORaBsvGBVZfsw_cSOiOzsOnr3g0';
 
 const MIN_SUBMISSIONS = 8;
-
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-const PHASE_NAMES = { A:'Acquisition & Retention', B:'Decision', C:'Payments', D:'Accounts Receivable', E:'Write-Off', F:'Recovery' };
 
+// Phase E metrics only
 const FORMULAS = [
-  {id:'A1_prime',label:'% Prime',group:'A1',gl:'Application: % Prime, Subprime, Unscored',n:'1a',d:'1a+1b',f:'pct',p:'A'},
-  {id:'A1_sub',label:'% Subprime',group:'A1',gl:'Application: % Prime, Subprime, Unscored',n:'1b',d:'1a+1b',f:'pct',p:'A'},
-  {id:'A2_approve',label:'Approval Rate',group:'A2',gl:'Approval Rates',n:'2a',d:'1a+1b',f:'pct',p:'A'},
-  {id:'A3_activate',label:'Activation Rate',group:'A3',gl:'Activation Rate',n:'3a',d:'2a',f:'pct',p:'A'},
-  {id:'A4_churn',label:'Churn Rate',group:'A4',gl:'Churn Rate',n:'4a',d:'4b',f:'pct',p:'A'},
-  {id:'B1_deny',label:'Denial Rate',group:'B1',gl:'Denial Rates',n:'B1a',d:'B1a+B1b',f:'pct',p:'B'},
-  {id:'C1_autopay',label:'AutoPay Enrollment',group:'C1',gl:'Payment Methods',n:'C1a',d:'C1b',f:'pct',p:'C'},
-  {id:'D1_dso',label:'Days Sales Outstanding',group:'D1',gl:'DSO',n:'D1a',d:'D1b',f:'days',p:'D'},
-  {id:'D2_current',label:'% Current',group:'D2',gl:'Aging Buckets',n:'D2a',d:'D2total',f:'pct',p:'D'},
-  {id:'E1_worate',label:'Write-Off Rate',group:'E1',gl:'Write-Off Rate',n:'E1a',d:'E1b',f:'pct',p:'E'},
-  {id:'F1_recovery',label:'Recovery Rate',group:'F1',gl:'Recovery Rate',n:'F1a',d:'F1b',f:'pct',p:'F'},
+  { id:'E1_worate',  label:'Write-Off Rate',              group:'E1 — Write-Off Volume',    n:'E1a', d:'E1b', f:'pct'  },
+  { id:'E1_avgbal',  label:'Avg Balance at Write-Off',    group:'E1 — Write-Off Volume',    n:'E1d', d:'1.0', f:'dollar'},
+  { id:'E2_nonpay',  label:'% Written Off — Non-Pay',     group:'E2 — Write-Off by Reason', n:'E2a', d:'E1a', f:'pct'  },
+  { id:'E2_fraud',   label:'% Written Off — Fraud',       group:'E2 — Write-Off by Reason', n:'E2b', d:'E1a', f:'pct'  },
+  { id:'E2_bk',      label:'% Written Off — Bankruptcy',  group:'E2 — Write-Off by Reason', n:'E2c', d:'E1a', f:'pct'  },
+  { id:'E3_lag',     label:'Avg Days to Write-Off',       group:'E3 — Timing & Equipment',  n:'E3a', d:'1.0', f:'days' },
+  { id:'E3_equip',   label:'% Accounts w/ Unreturned Equip', group:'E3 — Timing & Equipment', n:'E3d', d:'E1c', f:'pct'},
+  { id:'E4_recrate', label:'In-House Recovery Rate',      group:'E4 — Post Write-Off Recovery', n:'E4a', d:'E1a', f:'pct'},
 ];
 
 let allSubmissions = [];
-let activePhase = 'A';
-let validToken = null;
 
 async function sbFetch(path) {
   const r = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
-    method: 'GET',
     headers: {
       'apikey': ANON_KEY,
       'Authorization': `Bearer ${ANON_KEY}`,
-      'Content-Type': 'application/json',
-      'Prefer': 'return=representation'
+      'Content-Type': 'application/json'
     }
   });
-  if (!r.ok) {
-    const errText = await r.text();
-    console.error('Supabase error:', r.status, errText);
-    throw new Error(`Supabase error: ${r.status}`);
-  }
+  if (!r.ok) throw new Error(`Supabase error: ${r.status}`);
   return r.json();
 }
 
-async function validateToken() {
-  const token = document.getElementById('tokenInput').value.trim();
-  if (!token) { showError('Please enter your session token.'); return; }
-
-  const btn = document.querySelector('#gateView .btn-primary');
-  const btnText = document.getElementById('loginBtnText');
-  btnText.innerHTML = '<span class="spinner"></span>';
-  btn.disabled = true;
-  showError('');
+async function loadReports() {
+  show('loadingView');
+  hide('pendingView');
+  hide('reportView');
 
   try {
-    // Pull all submissions - select all columns since we'll work with what's there
     const all = await sbFetch(`raw_submissions?select=*&limit=500`);
     allSubmissions = all || [];
-    console.log('raw_submissions sample row:', allSubmissions[0]);
-    console.log('Total rows:', allSubmissions.length);
 
-    // 2. Verify token exists
-    const match = allSubmissions.find(r => r.session_token === token);
-    if (!match) {
-      showError('Token not found. Please check and try again.');
-      return;
-    }
-    validToken = token;
+    const uniqueCompanies = new Set(allSubmissions.map(r => r.session_token));
+    const count = uniqueCompanies.size;
 
-    const uniqueTokens = new Set(all.map(r => r.session_token));
-    const submissionCount = uniqueTokens.size;
+    hide('loadingView');
 
-    if (submissionCount < MIN_SUBMISSIONS) {
-      // Show pending screen with progress
-      showPending(submissionCount);
+    if (count < MIN_SUBMISSIONS) {
+      showPending(count);
     } else {
-      // Show full reports
       showReports();
     }
   } catch(e) {
-    console.error('validateToken error:', e);
-    showError('Connection error: ' + (e.message || 'Please try again.'));
-  } finally {
-    btnText.textContent = 'View Reports';
-    btn.disabled = false;
+    hide('loadingView');
+    show('pendingView');
+    document.getElementById('progressLabel').textContent = 'Connection error — please try again.';
+    console.error(e);
   }
 }
 
-function showError(msg) {
-  document.getElementById('gateError').textContent = msg;
-}
-
 function showPending(count) {
-  document.getElementById('gateView').classList.add('hidden');
-  document.getElementById('pendingView').classList.remove('hidden');
-
+  show('pendingView');
   const pct = Math.min(100, Math.round((count / MIN_SUBMISSIONS) * 100));
   document.getElementById('progressLabel').textContent = `${count} of ${MIN_SUBMISSIONS} submissions received`;
   document.getElementById('progressFill').style.width = pct + '%';
-  document.getElementById('progressSub').textContent = `${MIN_SUBMISSIONS - count} more member${MIN_SUBMISSIONS - count === 1 ? '' : 's'} needed to unlock reports`;
-}
-
-async function checkAgain() {
-  // Re-check the count using the stored valid token
-  document.getElementById('tokenInput').value = validToken || '';
-  document.getElementById('pendingView').classList.add('hidden');
-  document.getElementById('gateView').classList.remove('hidden');
-  await validateToken();
+  document.getElementById('progressSub').textContent =
+    `${MIN_SUBMISSIONS - count} more member${MIN_SUBMISSIONS - count === 1 ? '' : 's'} needed to unlock reports`;
 }
 
 function showReports() {
-  document.getElementById('gateView').classList.add('hidden');
-  document.getElementById('pendingView').classList.add('hidden');
-  document.getElementById('reportView').classList.remove('hidden');
+  show('reportView');
 
-  const uniqueTokens = [...new Set(allSubmissions.map(r => r.session_token))];
+  const uniqueCompanies = new Set(allSubmissions.map(r => r.session_token));
 
-  // Extract all months and phases from data_json blobs
+  // Collect all months that have Phase E data
   const monthSet = new Set();
-  const phaseSet = new Set();
   let totalDataPoints = 0;
 
   allSubmissions.forEach(row => {
-    const dj = row.data_json || {};
-    Object.entries(dj).forEach(([phase, monthMap]) => {
-      phaseSet.add(phase);
-      Object.entries(monthMap || {}).forEach(([month, fields]) => {
-        const vals = Object.values(fields || {}).filter(v => v !== '' && v !== null && v !== undefined);
-        if (vals.length > 0) {
-          monthSet.add(month);
-          totalDataPoints += vals.length;
-        }
-      });
+    const eData = (row.data_json || {})['E'] || {};
+    Object.entries(eData).forEach(([month, fields]) => {
+      const vals = Object.values(fields || {}).filter(v => v !== '' && v !== null && v !== undefined);
+      if (vals.length > 0) {
+        monthSet.add(month);
+        totalDataPoints += vals.length;
+      }
     });
   });
 
   const months = [...monthSet].sort((a,b) => MONTHS.indexOf(a) - MONTHS.indexOf(b));
-  const phases = [...phaseSet].sort();
 
   document.getElementById('reportMeta').textContent =
-    `Based on ${uniqueTokens.length} member submissions • Updated ${new Date().toLocaleDateString()}`;
+    `Based on ${uniqueCompanies.size} member submissions • Updated ${new Date().toLocaleDateString()}`;
 
   document.getElementById('reportSummary').innerHTML = `
-    <div class="summary-card"><div class="val">${uniqueTokens.length}</div><div class="lbl">Members Participating</div></div>
+    <div class="summary-card"><div class="val">${uniqueCompanies.size}</div><div class="lbl">Members Participating</div></div>
     <div class="summary-card"><div class="val">${months.length}</div><div class="lbl">Months of Data</div></div>
-    <div class="summary-card"><div class="val">${phases.length}</div><div class="lbl">Phases Covered</div></div>
     <div class="summary-card"><div class="val">${totalDataPoints.toLocaleString()}</div><div class="lbl">Data Points</div></div>
   `;
 
-  // Month selector — use all standard months if any data exists, else show available
   const sel = document.getElementById('monthSelect');
   const displayMonths = months.length ? months : MONTHS;
   sel.innerHTML = displayMonths.map(m => `<option value="${m}">${m}</option>`).join('');
 
-  // Phase tabs — show all phases, highlight those with data
-  document.getElementById('phaseTabs').innerHTML = Object.entries(PHASE_NAMES).map(([p, name]) => {
-    const hasData = phaseSet.has(p);
-    return `<div class="phase-tab${p === activePhase ? ' active' : ''}${!hasData ? ' style="opacity:0.5"' : ''}" onclick="setPhase('${p}')">${p}: ${name}</div>`;
-  }).join('');
-
   renderMetrics();
 }
 
-function setPhase(p) {
-  activePhase = p;
-  document.querySelectorAll('.phase-tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.phase-tab').forEach(t => { if (t.textContent.startsWith(p+':')) t.classList.add('active'); });
-  renderMetrics();
-}
-
-// Get a field value from a single submission's data_json for a given phase/month/fieldId
-function getFieldVal(row, phase, month, fieldId) {
-  const v = ((row.data_json || {})[phase] || {})[month]?.[fieldId];
+function getFieldVal(row, month, fieldId) {
+  const v = ((row.data_json || {})['E'] || {})[month]?.[fieldId];
   if (v === undefined || v === null || v === '') return null;
   const n = parseFloat(v);
   return isNaN(n) ? null : n;
 }
 
-// Calculate a metric for one member submission for a given month
 function calcMetric(formula, row, month) {
-  const phase = formula.p;
   const nFields = formula.n.split('+').map(f => f.trim());
   const dFields = formula.d.split('+').map(f => f.trim());
 
-  // Numerator: sum all specified fields
-  const nVals = nFields.map(f => getFieldVal(row, phase, month, f)).filter(v => v !== null);
+  const nVals = nFields.map(f => getFieldVal(row, month, f)).filter(v => v !== null);
   if (nVals.length === 0) return null;
   const nSum = nVals.reduce((a, b) => a + b, 0);
 
-  // Denominator: if '1.0' treat as 1 (direct value), otherwise sum fields
   let dSum = 1;
-  if (dFields.length === 1 && dFields[0] === '1.0') {
-    dSum = 1;
-  } else {
-    const dVals = dFields.map(f => getFieldVal(row, phase, month, f)).filter(v => v !== null);
+  if (!(dFields.length === 1 && dFields[0] === '1.0')) {
+    const dVals = dFields.map(f => getFieldVal(row, month, f)).filter(v => v !== null);
     if (dVals.length === 0) return null;
     dSum = dVals.reduce((a, b) => a + b, 0);
   }
@@ -378,24 +311,19 @@ function calcMetric(formula, row, month) {
 
 function fmt(val, type) {
   if (val === null || val === undefined) return '—';
-  if (type === 'pct') return (val * 100).toFixed(1) + '%';
-  if (type === 'days') return val.toFixed(1) + ' days';
-  return val.toLocaleString(undefined, {maximumFractionDigits: 2});
+  if (type === 'pct')    return (val * 100).toFixed(1) + '%';
+  if (type === 'days')   return val.toFixed(1) + ' days';
+  if (type === 'dollar') return '$' + val.toLocaleString(undefined, {minimumFractionDigits:0, maximumFractionDigits:0});
+  return val.toLocaleString(undefined, {maximumFractionDigits:2});
 }
 
 function renderMetrics() {
   const month = document.getElementById('monthSelect').value;
-  const phaseFormulas = FORMULAS.filter(f => f.p === activePhase);
-
-  if (!phaseFormulas.length) {
-    document.getElementById('metricsContainer').innerHTML = '<p class="no-data">No metrics defined for this phase yet.</p>';
-    return;
-  }
 
   const groups = {};
-  phaseFormulas.forEach(f => {
-    if (!groups[f.gl]) groups[f.gl] = [];
-    groups[f.gl].push(f);
+  FORMULAS.forEach(f => {
+    if (!groups[f.group]) groups[f.group] = [];
+    groups[f.group].push(f);
   });
 
   const participantCount = allSubmissions.length;
@@ -418,7 +346,6 @@ function renderMetrics() {
   Object.entries(groups).forEach(([groupLabel, formulas]) => {
     html += `<tr><td colspan="6" class="metric-group">${groupLabel}</td></tr>`;
     formulas.forEach(formula => {
-      // One value per member submission
       const memberVals = allSubmissions
         .map(row => calcMetric(formula, row, month))
         .filter(v => v !== null);
@@ -450,14 +377,14 @@ function renderMetrics() {
   document.getElementById('metricsContainer').innerHTML = html;
 }
 
-// Auto-fill token from URL param
+function show(id) { document.getElementById(id).classList.remove('hidden'); }
+function hide(id) { document.getElementById(id).classList.add('hidden'); }
+
+// On load — set username in header and auto-load reports
 window.addEventListener('DOMContentLoaded', () => {
-  const params = new URLSearchParams(window.location.search);
-  const t = params.get('token');
-  if (t) {
-    document.getElementById('tokenInput').value = t;
-    validateToken();
-  }
+  const user = sessionStorage.getItem('trma_user');
+  if (user) document.getElementById('headerUser').textContent = '👤 ' + user;
+  loadReports();
 });
 </script>
 </body>
