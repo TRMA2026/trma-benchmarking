@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TRMA Benchmarking — Data Entry</title>
+<title>TRMA Benchmarking — Phase E: Write-Off</title>
 <style>
 :root {
   --navy:#1B3A5C; --blue:#2176BC; --gold:#C9A227; --green:#28a745;
@@ -17,14 +17,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .nav-right{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
 .nav a{color:#a8c8e8;text-decoration:none;font-size:13px;}
 .nav a:hover{color:#fff;}
+.nav-user{font-size:12px;color:#7aabda;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.18);border-radius:4px;padding:4px 10px;}
+.logout-link{font-size:12px;color:#a8c8e8;background:none;border:none;cursor:pointer;text-decoration:underline;padding:0;}
+.logout-link:hover{color:#fff;}
 .container{max-width:960px;margin:0 auto;padding:20px;}
-/* Phase tabs */
-.phase-nav{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:20px;}
-.phase-btn{padding:8px 16px;border:1px solid var(--border);background:#fff;border-radius:6px 6px 0 0;cursor:pointer;font-size:13px;font-weight:600;color:var(--muted);transition:all .15s;}
-.phase-btn.active{background:var(--navy);color:#fff;border-color:var(--navy);}
-.phase-btn:hover:not(.active){background:#e8f0fe;color:var(--navy);}
-.phase-btn .badge{display:inline-block;margin-left:6px;background:var(--green);color:#fff;border-radius:99px;padding:1px 6px;font-size:11px;}
-.phase-btn.active .badge{background:rgba(255,255,255,0.3);}
+/* Phase header */
+.phase-header{background:linear-gradient(135deg,var(--navy),#2a5a8c);color:#fff;padding:16px 20px;margin-bottom:20px;border-radius:var(--radius);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+.phase-header h2{font-size:18px;font-weight:700;margin:0;}
+.phase-header p{font-size:13px;color:#b8d4f0;margin:4px 0 0;}
+.phase-badge{background:var(--gold);color:#fff;font-size:11px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;border-radius:99px;padding:3px 12px;}
 /* Cards */
 .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px;}
 .card-title{font-weight:700;color:var(--navy);font-size:14px;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid var(--gold);}
@@ -44,8 +45,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .ref-col{width:70px;font-family:monospace;font-size:12px;color:var(--muted);}
 .num-input{width:130px;padding:5px 8px;border:1px solid var(--border);border-radius:4px;font-size:13px;text-align:right;}
 .num-input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 2px rgba(33,118,188,.15);}
-.calc-row td{background:#eef4fb;font-style:italic;color:var(--blue);}
-.calc-val{font-weight:600;color:var(--blue);}
 /* Progress */
 .progress-wrap{background:#e9ecef;border-radius:99px;height:10px;overflow:hidden;margin:6px 0;}
 .progress-fill{background:linear-gradient(90deg,var(--blue),#1a5fa8);height:100%;border-radius:99px;transition:width .4s;}
@@ -64,7 +63,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .btn-gold:hover{background:#b8911f;}
 .btn-secondary{background:#fff;color:var(--navy);border:1px solid var(--border);}
 .btn-secondary:hover{background:var(--bg);}
-.btn-danger{background:var(--red);color:#fff;}
 /* Submit footer */
 .submit-footer{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;padding-top:12px;border-top:1px solid var(--border);margin-top:8px;}
 .error{color:var(--red);font-size:13px;}
@@ -79,13 +77,32 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 </head>
 <body>
 
+<!-- Auth check -->
+<script>
+  if (sessionStorage.getItem('trma_auth') !== 'true') {
+    window.location.href = 'login.html';
+  }
+  function logout() {
+    sessionStorage.removeItem('trma_auth');
+    sessionStorage.removeItem('trma_user');
+    window.location.href = 'login.html';
+  }
+</script>
+
 <div class="nav">
-  <h1>📋 TRMA Benchmarking — Data Entry</h1>
+  <h1>📋 TRMA Benchmarking — Phase E: Write-Off</h1>
   <div class="nav-right">
+    <span class="nav-user" id="navUser"></span>
     <span id="navCompany" style="font-size:13px;color:#a8c8e8;"></span>
     <a href="index.html">← Dashboard</a>
+    <button class="logout-link" onclick="logout()">Sign Out</button>
   </div>
 </div>
+
+<script>
+  const _user = sessionStorage.getItem('trma_user');
+  if (_user) document.getElementById('navUser').textContent = '👤 ' + _user;
+</script>
 
 <!-- PROFILE SCREEN -->
 <div id="screenProfile" class="container">
@@ -124,12 +141,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 <!-- DATA ENTRY SCREEN -->
 <div id="screenEntry" class="container hidden">
 
+  <!-- Phase header -->
+  <div class="phase-header">
+    <div>
+      <h2>Phase E — Write-Off</h2>
+      <p>Enter your monthly write-off metrics below. Enter whole-number counts and dollar amounts only — percentages are computed automatically.</p>
+    </div>
+    <span class="phase-badge">Active Phase</span>
+  </div>
+
   <div class="info-bar">
     Enter whole-number counts and dollar amounts. Do not enter calculated percentages — the system computes those automatically. Enter <strong>0</strong> where applicable; leave blank only if truly not applicable.
   </div>
-
-  <!-- Phase tabs -->
-  <div class="phase-nav" id="phaseTabs"></div>
 
   <!-- Month bar -->
   <div class="month-bar" id="monthBar"></div>
@@ -141,7 +164,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   <div class="card">
     <div class="submit-footer">
       <div>
-        <div class="progress-label" id="overallLabel">Overall completion: 0%</div>
+        <div class="progress-label" id="overallLabel">Phase E completion: 0%</div>
         <div class="progress-wrap" style="width:200px"><div class="progress-fill" id="overallBar" style="width:0%"></div></div>
       </div>
       <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
@@ -159,7 +182,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   <div class="success-box card" style="max-width:520px;margin:40px auto;">
     <div style="font-size:48px;margin-bottom:12px;">✅</div>
     <h3>Submission Received!</h3>
-    <p style="color:#155724;margin-bottom:12px;">Your benchmarking data has been submitted successfully. Save your session token — you'll need it to access reports.</p>
+    <p style="color:#155724;margin-bottom:12px;">Your Phase E Write-Off data has been submitted successfully. Save your session token — you'll need it to access reports.</p>
     <div class="token-display" id="successToken"></div>
     <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:16px;">
       <button class="btn btn-secondary" onclick="copyToken()">📋 Copy Token</button>
@@ -179,11 +202,48 @@ const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsI
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 
 // ─────────────────────────────────────────────
-// FIELD DEFINITIONS — All 6 Phases
+// PHASE E ONLY — Other phases archived in git
+// To reactivate a phase, restore it from git
+// history and add it back to this PHASES object.
 // ─────────────────────────────────────────────
 const PHASES = {
+  E: {
+    label: 'Write-Off',
+    groups: [
+      { g: 'E1 — Write-Off Volume', items: [
+        {id:'E1a', lb:'$ Total Amount Written Off', type:'currency'},
+        {id:'E1b', lb:'$ Total Revenue Billed (same period)', type:'currency'},
+        {id:'E1c', lb:'# Accounts Written Off', type:'count'},
+        {id:'E1d', lb:'$ Average Balance at Write-Off', type:'currency'},
+      ]},
+      { g: 'E2 — Write-Off by Reason', items: [
+        {id:'E2a', lb:'$ Written Off — Non-Pay (Credit Risk)', type:'currency'},
+        {id:'E2b', lb:'$ Written Off — Fraud', type:'currency'},
+        {id:'E2c', lb:'$ Written Off — Bankruptcy', type:'currency'},
+        {id:'E2d', lb:'$ Written Off — Other', type:'currency'},
+      ]},
+      { g: 'E3 — Write-Off Timing & Equipment', items: [
+        {id:'E3a', lb:'Average Days to Write-Off from First Delinquency', type:'days'},
+        {id:'E3b', lb:'# Accounts Written Off — Voluntary Churn', type:'count'},
+        {id:'E3c', lb:'# Accounts Written Off — Involuntary Churn', type:'count'},
+        {id:'E3d', lb:'# Accounts with Unreturned Equipment at Write-Off', type:'count'},
+        {id:'E3e', lb:'$ Equipment Value — Unreturned at Write-Off', type:'currency'},
+      ]},
+      { g: 'E4 — Post-Write-Off Internal Recovery', items: [
+        {id:'E4a', lb:'$ Recovered In-House After Write-Off', type:'currency'},
+        {id:'E4b', lb:'# Accounts Recovered In-House After Write-Off', type:'count'},
+      ]},
+    ]
+  }
 
-  A: {
+  /*
+   * ── ARCHIVED PHASES ──────────────────────────────────────────
+   * Phases A, B, C, D, and F are preserved below as comments.
+   * To reactivate any phase, uncomment it and add a comma after
+   * the closing brace of Phase E above.
+   * ─────────────────────────────────────────────────────────────
+
+  ,A: {
     label: 'Acquisition',
     groups: [
       { g: 'A1 — Application: Credit Score Distribution', items: [
@@ -234,9 +294,9 @@ const PHASES = {
         {id:'11.2', lb:'# Accounts Churned (Involuntary — Fraud)', type:'count'},
       ]},
     ]
-  },
+  }
 
-  B: {
+  ,B: {
     label: 'Decision',
     groups: [
       { g: 'B1 — Deposit Decisions', items: [
@@ -260,9 +320,9 @@ const PHASES = {
         {id:'B3e', lb:'# Accounts Denied — Other', type:'count'},
       ]},
     ]
-  },
+  }
 
-  C: {
+  ,C: {
     label: 'Payments',
     groups: [
       { g: 'C1 — Payment Methods & AutoPay', items: [
@@ -294,9 +354,9 @@ const PHASES = {
         {id:'C4d', lb:'$ Total Amount Under Payment Arrangement', type:'currency'},
       ]},
     ]
-  },
+  }
 
-  D: {
+  ,D: {
     label: 'Accounts Receivable',
     groups: [
       { g: 'D1 — Days Sales Outstanding (DSO)', items: [
@@ -327,38 +387,9 @@ const PHASES = {
         {id:'D4f', lb:'# Accounts Disconnected (Non-Pay)', type:'count'},
       ]},
     ]
-  },
+  }
 
-  E: {
-    label: 'Write-Off',
-    groups: [
-      { g: 'E1 — Write-Off Volume', items: [
-        {id:'E1a', lb:'$ Total Amount Written Off', type:'currency'},
-        {id:'E1b', lb:'$ Total Revenue Billed (same period)', type:'currency'},
-        {id:'E1c', lb:'# Accounts Written Off', type:'count'},
-        {id:'E1d', lb:'$ Average Balance at Write-Off', type:'currency'},
-      ]},
-      { g: 'E2 — Write-Off by Reason', items: [
-        {id:'E2a', lb:'$ Written Off — Non-Pay (Credit Risk)', type:'currency'},
-        {id:'E2b', lb:'$ Written Off — Fraud', type:'currency'},
-        {id:'E2c', lb:'$ Written Off — Bankruptcy', type:'currency'},
-        {id:'E2d', lb:'$ Written Off — Other', type:'currency'},
-      ]},
-      { g: 'E3 — Write-Off Timing & Equipment', items: [
-        {id:'E3a', lb:'Average Days to Write-Off from First Delinquency', type:'days'},
-        {id:'E3b', lb:'# Accounts Written Off — Voluntary Churn', type:'count'},
-        {id:'E3c', lb:'# Accounts Written Off — Involuntary Churn', type:'count'},
-        {id:'E3d', lb:'# Accounts with Unreturned Equipment at Write-Off', type:'count'},
-        {id:'E3e', lb:'$ Equipment Value — Unreturned at Write-Off', type:'currency'},
-      ]},
-      { g: 'E4 — Post-Write-Off Internal Recovery', items: [
-        {id:'E4a', lb:'$ Recovered In-House After Write-Off', type:'currency'},
-        {id:'E4b', lb:'# Accounts Recovered In-House After Write-Off', type:'count'},
-      ]},
-    ]
-  },
-
-  F: {
+  ,F: {
     label: 'Recovery',
     groups: [
       { g: 'F1 — Placement Overview', items: [
@@ -406,16 +437,19 @@ const PHASES = {
       ]},
     ]
   }
+
+  * ── END ARCHIVED PHASES ──────────────────────────────────────
+  */
 };
 
 // ─────────────────────────────────────────────
 // STATE
 // ─────────────────────────────────────────────
 const S = {
-  profile: { code:'', name:'', entity:'', year:'2026' },
-  activePhase: 'A',
+  profile: { code:'', entity:'', year:'2026' },
+  activePhase: 'E',
   activeMonth: 'January',
-  data: {},   // { phase: { month: { fieldId: value } } }
+  data: {},
 };
 
 // ─────────────────────────────────────────────
@@ -433,7 +467,6 @@ function startEntry() {
   loadDraft();
   show('screenEntry');
   hide('screenProfile');
-  renderPhaseTabs();
   renderMonthBar();
   renderPhase();
 }
@@ -441,26 +474,17 @@ function startEntry() {
 // ─────────────────────────────────────────────
 // RENDER
 // ─────────────────────────────────────────────
-function renderPhaseTabs() {
-  const container = document.getElementById('phaseTabs');
-  container.innerHTML = Object.entries(PHASES).map(([key, ph]) => {
-    const pct = phaseCompletion(key);
-    const badge = pct > 0 ? `<span class="badge">${pct}%</span>` : '';
-    return `<button class="phase-btn${key===S.activePhase?' active':''}" onclick="switchPhase('${key}')">${key}: ${ph.label}${badge}</button>`;
-  }).join('');
-}
-
 function renderMonthBar() {
   const container = document.getElementById('monthBar');
   container.innerHTML = MONTHS.map(m => {
-    const hasData = monthHasData(S.activePhase, m);
+    const hasData = monthHasData('E', m);
     return `<button class="month-btn${m===S.activeMonth?' active':''}${hasData?' has-data':''}" onclick="switchMonth('${m}')">${m.substring(0,3)}<span class="dot"></span></button>`;
   }).join('');
 }
 
 function renderPhase() {
-  const phase = PHASES[S.activePhase];
-  const phaseData = (S.data[S.activePhase] || {})[S.activeMonth] || {};
+  const phase = PHASES['E'];
+  const phaseData = (S.data['E'] || {})[S.activeMonth] || {};
 
   let html = '';
   phase.groups.forEach(grp => {
@@ -474,14 +498,14 @@ function renderPhase() {
 
       if (f.ro) {
         const displayVal = val !== '' && val !== null ? Number(val).toLocaleString() : '—';
-        html += `<tr class="calc-row"><td class="ref-col">${f.id}</td><td>${f.lb}</td><td><span class="calc-val">${prefix}${displayVal}${suffix}</span></td></tr>`;
+        html += `<tr style="background:#eef4fb;font-style:italic;color:var(--blue);"><td class="ref-col">${f.id}</td><td>${f.lb}</td><td><span style="font-weight:600;color:var(--blue);">${prefix}${displayVal}${suffix}</span></td></tr>`;
       } else {
         html += `<tr>
           <td class="ref-col">${f.id}</td>
           <td>${f.lb}${prefix ? ` <span style="color:var(--muted);font-size:12px;">(${prefix})</span>` : ''}</td>
           <td><input class="num-input" type="number" min="0" step="${f.type==='pct'?'0.01':'1'}"
             value="${val}" placeholder="—"
-            onchange="setVal('${S.activePhase}','${S.activeMonth}','${f.id}',this.value)"
+            onchange="setVal('E','${S.activeMonth}','${f.id}',this.value)"
             onblur="refreshCalcs()" /></td>
         </tr>`;
       }
@@ -511,14 +535,6 @@ function setVal(phase, month, fieldId, value) {
 function refreshCalcs() {
   renderPhase();
   renderMonthBar();
-  renderPhaseTabs();
-}
-
-function switchPhase(p) {
-  S.activePhase = p;
-  renderPhaseTabs();
-  renderMonthBar();
-  renderPhase();
 }
 
 function switchMonth(m) {
@@ -532,36 +548,20 @@ function monthHasData(phase, month) {
   return Object.keys(d).length > 0;
 }
 
-function phaseCompletion(phase) {
-  const ph = PHASES[phase];
+function updateOverall() {
+  const phase = PHASES['E'];
   let total = 0, filled = 0;
-  ph.groups.forEach(g => {
+  phase.groups.forEach(g => {
     g.items.filter(f => !f.ro).forEach(f => {
       MONTHS.forEach(m => {
         total++;
-        const v = (S.data[phase] || {})[m] || {};
+        const v = (S.data['E'] || {})[m] || {};
         if (v[f.id] !== undefined && v[f.id] !== '') filled++;
       });
     });
   });
-  return total === 0 ? 0 : Math.round((filled / total) * 100);
-}
-
-function updateOverall() {
-  let total = 0, filled = 0;
-  Object.keys(PHASES).forEach(p => {
-    PHASES[p].groups.forEach(g => {
-      g.items.filter(f => !f.ro).forEach(f => {
-        MONTHS.forEach(m => {
-          total++;
-          const v = (S.data[p] || {})[m] || {};
-          if (v[f.id] !== undefined && v[f.id] !== '') filled++;
-        });
-      });
-    });
-  });
   const pct = total === 0 ? 0 : Math.round((filled / total) * 100);
-  document.getElementById('overallLabel').textContent = `Overall completion: ${pct}%`;
+  document.getElementById('overallLabel').textContent = `Phase E completion: ${pct}%`;
   document.getElementById('overallBar').style.width = pct + '%';
 }
 
@@ -569,7 +569,7 @@ function updateOverall() {
 // DRAFT (localStorage)
 // ─────────────────────────────────────────────
 function saveDraft() {
-  localStorage.setItem('trma_draft_' + S.profile.code, JSON.stringify(S.data));
+  localStorage.setItem('trma_draft_E_' + S.profile.code, JSON.stringify(S.data));
   const btn = document.querySelector('.btn-secondary');
   const orig = btn.textContent;
   btn.textContent = '✓ Saved!';
@@ -578,12 +578,12 @@ function saveDraft() {
 
 function saveDraftSilent() {
   if (S.profile.code) {
-    localStorage.setItem('trma_draft_' + S.profile.code, JSON.stringify(S.data));
+    localStorage.setItem('trma_draft_E_' + S.profile.code, JSON.stringify(S.data));
   }
 }
 
 function loadDraft() {
-  const saved = localStorage.getItem('trma_draft_' + S.profile.code);
+  const saved = localStorage.getItem('trma_draft_E_' + S.profile.code);
   if (saved) {
     try { S.data = JSON.parse(saved); } catch(e) {}
   }
@@ -596,12 +596,10 @@ async function handleSubmit() {
   const errEl = document.getElementById('submitError');
   errEl.textContent = '';
 
-  // Check at least one field filled
   let hasAny = false;
-  Object.values(S.data).forEach(phaseData => {
-    Object.values(phaseData).forEach(monthData => {
-      if (Object.keys(monthData).length > 0) hasAny = true;
-    });
+  const eData = S.data['E'] || {};
+  Object.values(eData).forEach(monthData => {
+    if (Object.keys(monthData).length > 0) hasAny = true;
   });
   if (!hasAny) { errEl.textContent = 'Please enter at least some data before submitting.'; return; }
 
@@ -638,10 +636,7 @@ async function handleSubmit() {
       throw new Error(errText);
     }
 
-    // Clear draft
-    localStorage.removeItem('trma_draft_' + S.profile.code);
-
-    // Show success
+    localStorage.removeItem('trma_draft_E_' + S.profile.code);
     document.getElementById('successToken').textContent = token;
     document.getElementById('reportsLink').href = `reports.html?token=${token}`;
     window._submissionToken = token;

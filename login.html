@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TRMA Benchmarking — Member Login</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+
+:root {
+  --navy: #1B3A5C;
+  --blue: #2176BC;
+  --light-blue: #E8F0FE;
+  --gold: #C9A227;
+  --bg: #f0f4f9;
+  --card: #ffffff;
+  --border: #dce4ef;
+  --muted: #6c7d8e;
+  --red: #dc3545;
+  --radius: 12px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background-image:
+    radial-gradient(ellipse at 20% 50%, rgba(33,118,188,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 20%, rgba(27,58,92,0.06) 0%, transparent 50%);
+}
+
+.login-wrap {
+  width: 100%;
+  max-width: 420px;
+}
+
+.brand {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.brand-logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  background: linear-gradient(135deg, var(--navy), var(--blue));
+  border-radius: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 8px 24px rgba(27,58,92,0.25);
+}
+
+.brand-logo svg {
+  width: 32px;
+  height: 32px;
+  color: #fff;
+}
+
+.brand h1 {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--navy);
+  letter-spacing: -0.3px;
+  margin-bottom: 4px;
+}
+
+.brand p {
+  font-size: 13px;
+  color: var(--muted);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 36px 32px;
+  box-shadow: 0 4px 24px rgba(27,58,92,0.08);
+}
+
+.card h2 {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--navy);
+  margin-bottom: 6px;
+}
+
+.card .subtitle {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 28px;
+  line-height: 1.5;
+}
+
+.form-group {
+  margin-bottom: 18px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--navy);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  margin-bottom: 7px;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: 'DM Sans', sans-serif;
+  color: var(--navy);
+  background: #fafbfd;
+  transition: all 0.15s;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: var(--blue);
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(33,118,188,0.12);
+}
+
+.form-group input::placeholder {
+  color: #b0bbc8;
+}
+
+.btn-login {
+  width: 100%;
+  padding: 13px;
+  background: linear-gradient(135deg, var(--navy), var(--blue));
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+  letter-spacing: 0.3px;
+  transition: all 0.2s;
+  margin-top: 8px;
+  box-shadow: 0 4px 12px rgba(27,58,92,0.2);
+}
+
+.btn-login:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(27,58,92,0.28);
+}
+
+.btn-login:active {
+  transform: translateY(0);
+}
+
+.btn-login:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.error-box {
+  background: #fff5f5;
+  border: 1px solid #f5c6cb;
+  border-radius: 8px;
+  padding: 11px 14px;
+  font-size: 13px;
+  color: var(--red);
+  margin-bottom: 16px;
+  display: none;
+}
+
+.error-box.visible {
+  display: block;
+}
+
+.divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 24px 0 20px;
+}
+
+.help-text {
+  font-size: 12px;
+  color: var(--muted);
+  text-align: center;
+  line-height: 1.6;
+}
+
+.help-text a {
+  color: var(--blue);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.footer {
+  margin-top: 28px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* Shake animation on error */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+.shake { animation: shake 0.4s ease; }
+
+/* Fade in on load */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.login-wrap { animation: fadeUp 0.4s ease both; }
+</style>
+</head>
+<body>
+
+<div class="login-wrap">
+  <div class="brand">
+    <div class="brand-logo">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/>
+      </svg>
+    </div>
+    <h1>TRMA Benchmarking Portal</h1>
+    <p>Telecommunications Risk Management Association</p>
+  </div>
+
+  <div class="card">
+    <h2>Member Login</h2>
+    <p class="subtitle">Enter your credentials to access the benchmarking portal. Contact <a href="mailto:tclark@trmanet.org">tclark@trmanet.org</a> if you need access.</p>
+
+    <div class="error-box" id="errorBox">
+      Incorrect username or password. Please try again.
+    </div>
+
+    <div class="form-group">
+      <label>Username</label>
+      <input type="text" id="username" placeholder="Your assigned username" autocomplete="username" />
+    </div>
+
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="password" placeholder="Your assigned password" autocomplete="current-password"
+        onkeydown="if(event.key==='Enter') doLogin()" />
+    </div>
+
+    <button class="btn-login" id="loginBtn" onclick="doLogin()">Sign In →</button>
+
+    <hr class="divider">
+
+    <p class="help-text">
+      Don't have credentials?<br>
+      Email <a href="mailto:tclark@trmanet.org">tclark@trmanet.org</a> to request access.
+    </p>
+  </div>
+
+  <div class="footer">
+    &copy; 2026 Telecommunications Risk Management Association
+  </div>
+</div>
+
+<!-- Load credentials -->
+<script src="credentials.js"></script>
+<script>
+  // If already logged in, skip to index
+  if (sessionStorage.getItem('trma_auth') === 'true') {
+    window.location.href = 'index.html';
+  }
+
+  function doLogin() {
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value;
+    const errorBox = document.getElementById('errorBox');
+    const btn      = document.getElementById('loginBtn');
+    const card     = document.querySelector('.card');
+
+    errorBox.classList.remove('visible');
+
+    if (!username || !password) {
+      errorBox.textContent = 'Please enter both username and password.';
+      errorBox.classList.add('visible');
+      card.classList.add('shake');
+      setTimeout(() => card.classList.remove('shake'), 400);
+      return;
+    }
+
+    // Check credentials
+    if (CREDENTIALS[username] && CREDENTIALS[username] === password) {
+      btn.textContent = '✓ Authenticated...';
+      btn.disabled = true;
+      sessionStorage.setItem('trma_auth', 'true');
+      sessionStorage.setItem('trma_user', username);
+      setTimeout(() => { window.location.href = 'index.html'; }, 600);
+    } else {
+      errorBox.textContent = 'Incorrect username or password. Please try again.';
+      errorBox.classList.add('visible');
+      card.classList.add('shake');
+      setTimeout(() => card.classList.remove('shake'), 400);
+      document.getElementById('password').value = '';
+      document.getElementById('password').focus();
+    }
+  }
+</script>
+</body>
+</html>

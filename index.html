@@ -20,10 +20,43 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; min-height: 100vh; }
 
-.hero { background: linear-gradient(135deg, var(--navy) 0%, #2a5a8c 100%); color: #fff; padding: 48px 24px 40px; text-align: center; }
+.hero { background: linear-gradient(135deg, var(--navy) 0%, #2a5a8c 100%); color: #fff; padding: 48px 24px 40px; text-align: center; position: relative; }
 .hero h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.3px; }
 .hero p { font-size: 16px; color: #b8d4f0; max-width: 600px; margin: 0 auto; }
 .hero .tagline { font-size: 13px; color: #7aabda; margin-top: 12px; letter-spacing: 1px; text-transform: uppercase; }
+
+/* Logout button in hero */
+.logout-btn {
+  position: absolute;
+  top: 16px;
+  right: 20px;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.25);
+  color: #fff;
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.logout-btn:hover { background: rgba(255,255,255,0.22); }
+
+.user-badge {
+  position: absolute;
+  top: 16px;
+  left: 20px;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: #b8d4f0;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
 
 .container { max-width: 900px; margin: 0 auto; padding: 32px 24px; }
 
@@ -38,18 +71,43 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
 .card-icon.blue { background: var(--light-blue); color: var(--blue); }
 .card-icon.green { background: #e8f5e9; color: var(--green); }
 .card-icon.navy { background: #e3eaf2; color: var(--navy); }
+.card-icon.orange { background: #fff3e0; color: #e65100; }
 
 .card h2 { font-size: 17px; color: var(--navy); margin-bottom: 6px; font-weight: 600; }
 .card p { font-size: 13px; color: var(--muted); line-height: 1.5; flex: 1; }
 .card .arrow { margin-top: 14px; font-size: 13px; color: var(--blue); font-weight: 500; }
 
+/* Active phase highlight badge */
+.active-badge {
+  display: inline-block;
+  background: var(--green);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  border-radius: 99px;
+  padding: 2px 8px;
+  margin-bottom: 8px;
+}
+
 .info-section { margin-top: 40px; }
-.info-section h3 { font-size: 16px; color: var(--navy); margin-bottom: 12px; }
+.info-section h3 { font-size: 16px; color: var(--navy); margin-bottom: 4px; }
+.info-section .section-sub { font-size: 13px; color: var(--muted); margin-bottom: 14px; }
 
 .phases { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; }
 .phase-chip { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 12px 10px; text-align: center; }
 .phase-chip .code { font-size: 20px; font-weight: 700; color: var(--blue); }
 .phase-chip .name { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+/* Active phase chip */
+.phase-chip.phase-active { border-color: var(--green); background: #f0faf2; }
+.phase-chip.phase-active .code { color: var(--green); }
+.phase-chip.phase-active .name { color: #1a7a35; font-weight: 600; }
+
+/* Archived phase chip */
+.phase-chip.phase-archived { opacity: 0.45; }
+.phase-chip.phase-archived .code { color: var(--muted); }
 
 .footer { text-align: center; padding: 32px 24px; color: var(--muted); font-size: 12px; }
 .footer a { color: var(--blue); text-decoration: none; }
@@ -62,19 +120,71 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
 .btn-primary:hover { background: #1a65a3; }
 .btn-outline { background: #fff; color: var(--navy); border: 1px solid var(--border); }
 .btn-outline:hover { background: #f8f9fa; }
+
+/* Notice bar */
+.notice-bar {
+  background: #fff8e1;
+  border: 1px solid #ffe082;
+  border-radius: var(--radius);
+  padding: 14px 20px;
+  margin-top: 24px;
+  font-size: 13px;
+  color: #795548;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+.notice-bar strong { color: #5d4037; }
 </style>
 </head>
 <body>
 
+<!-- Auth check -->
+<script>
+  if (sessionStorage.getItem('trma_auth') !== 'true') {
+    window.location.href = 'login.html';
+  }
+  function logout() {
+    sessionStorage.removeItem('trma_auth');
+    sessionStorage.removeItem('trma_user');
+    window.location.href = 'login.html';
+  }
+</script>
+
 <div class="hero">
+  <div class="user-badge" id="userBadge">👤 Member</div>
+  <button class="logout-btn" onclick="logout()">
+    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75"/>
+    </svg>
+    Sign Out
+  </button>
   <div class="tagline">Telecommunications Risk Management Association</div>
   <h1>TRMA Benchmarking Portal</h1>
-  <p>Enter your operational data, benchmark against industry peers, and access aggregated reports — all anonymously.</p>
+  <p>Submit your operational data, benchmark against industry peers, and access aggregated reports — all anonymously.</p>
 </div>
+
+<script>
+  const user = sessionStorage.getItem('trma_user');
+  if (user) document.getElementById('userBadge').textContent = '👤 ' + user;
+</script>
 
 <div class="container">
 
   <div class="cards">
+    <!-- Enter Data -->
+    <a href="survey.html" class="card">
+      <div class="active-badge">Now Active</div>
+      <div class="card-icon orange">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zM16.862 4.487L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"/>
+        </svg>
+      </div>
+      <h2>Enter Data — Phase E</h2>
+      <p>Submit your Write-Off benchmarking data directly on the web form. Currently collecting Phase E metrics.</p>
+      <span class="arrow">Start data entry →</span>
+    </a>
+
     <!-- Upload Data -->
     <a href="upload.html" class="card">
       <div class="card-icon green">
@@ -87,18 +197,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
       <span class="arrow">Upload spreadsheet →</span>
     </a>
 
-    <!-- Manual Entry -->
-    <a href="survey.html" class="card">
-      <div class="card-icon" style="background:#fff3e0;color:#e65100;">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zM16.862 4.487L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"/>
-        </svg>
-      </div>
-      <h2>Enter Data Online</h2>
-      <p>Fill in your benchmarking data directly on the web form — no spreadsheet needed. Currently covers Phase A.</p>
-      <span class="arrow">Start data entry →</span>
-    </a>
-
     <!-- View Reports -->
     <a href="reports.html" class="card">
       <div class="card-icon blue">
@@ -107,7 +205,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
         </svg>
       </div>
       <h2>View Reports</h2>
-      <p>View aggregated benchmarks, peer comparisons, and trend data across all submitted metrics.</p>
+      <p>View aggregated benchmarks, peer comparisons, and trend data across all Phase E submissions.</p>
       <span class="arrow">View benchmarks →</span>
     </a>
 
@@ -125,11 +223,17 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
     </a>
   </div>
 
+  <!-- Notice -->
+  <div class="notice-bar">
+    <span style="font-size:18px;">📌</span>
+    <div><strong>Currently collecting Phase E — Write-Off data.</strong> Additional phases will be activated in future survey periods. Use the Excel template below if you prefer to submit via spreadsheet.</div>
+  </div>
+
   <!-- Template download -->
   <div class="template-bar">
     <div class="info">
       <strong>Download the Data Entry Template</strong><br>
-      <span>Excel file with all 6 phases — fill in your data, then upload above.</span>
+      <span>Excel file with all phases — fill in your data, then upload above.</span>
     </div>
     <a href="TRMA_Rapid_Survey_Template.xlsx" download class="btn btn-primary">
       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
@@ -140,13 +244,14 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
   <!-- Phases overview -->
   <div class="info-section">
     <h3>Survey Phases</h3>
+    <p class="section-sub">Phase E is the active collection period. All other phases are archived and will be reactivated in future periods.</p>
     <div class="phases">
-      <div class="phase-chip"><div class="code">A</div><div class="name">Acquisition &amp; Retention</div></div>
-      <div class="phase-chip"><div class="code">B</div><div class="name">Decision</div></div>
-      <div class="phase-chip"><div class="code">C</div><div class="name">Payments</div></div>
-      <div class="phase-chip"><div class="code">D</div><div class="name">Accounts Receivable</div></div>
-      <div class="phase-chip"><div class="code">E</div><div class="name">Write-Off</div></div>
-      <div class="phase-chip"><div class="code">F</div><div class="name">Recovery</div></div>
+      <div class="phase-chip phase-archived"><div class="code">A</div><div class="name">Acquisition &amp; Retention</div></div>
+      <div class="phase-chip phase-archived"><div class="code">B</div><div class="name">Decision</div></div>
+      <div class="phase-chip phase-archived"><div class="code">C</div><div class="name">Payments</div></div>
+      <div class="phase-chip phase-archived"><div class="code">D</div><div class="name">Accounts Receivable</div></div>
+      <div class="phase-chip phase-active"><div class="code">E ✓</div><div class="name">Write-Off — Active</div></div>
+      <div class="phase-chip phase-archived"><div class="code">F</div><div class="name">Recovery</div></div>
     </div>
   </div>
 
