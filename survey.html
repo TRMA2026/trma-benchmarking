@@ -528,12 +528,11 @@ function renderPhase() {
       const sum = grp.check.fields.reduce((s,k) => s + (+phaseData[k]||0), 0);
       const against = +phaseData[grp.check.against] || 0;
       const bothEntered = against > 0 && grp.check.fields.some(k => phaseData[k] !== undefined);
-      if (bothEntered && Math.abs(sum - against) > 0.01) {
-        checkWarning = `<div style="background:#fff3cd;border:1px solid #ffc107;border-radius:6px;padding:10px 14px;margin-bottom:12px;font-size:13px;color:#856404;">
-          ⚠️ <strong>Check:</strong> ${grp.check.label}
-          — current sum: <strong>${sum.toLocaleString()}</strong>, expected: <strong>${against.toLocaleString()}</strong>
-        </div>`;
-      }
+      const visible = bothEntered && Math.abs(sum - against) > 0.01;
+      checkWarning = `<div data-check="${grp.check.against}" style="background:#fff3cd;border:1px solid #ffc107;border-radius:6px;padding:10px 14px;margin-bottom:12px;font-size:13px;color:#856404;display:${visible?'block':'none'};">
+        ⚠️ <strong>Check:</strong> ${grp.check.label}
+        — current sum: <strong>${sum.toLocaleString()}</strong>, expected: <strong>${against.toLocaleString()}</strong>
+      </div>`;
     }
 
     // Section note
@@ -568,8 +567,7 @@ function renderPhase() {
             value="${val}"
             placeholder="—"
             tabindex="${tabIdx++}"
-            oninput="setVal('E','${S.activeMonth}','${f.id}',this.value)"
-            onblur="softRefresh()" /></td>
+            oninput="setValAndCalc('E','${S.activeMonth}','${f.id}',this.value)" /></td>
         </tr>`;
       }
     });
@@ -600,39 +598,45 @@ function refreshCalcs() {
   renderMonthBar();
 }
 
-// Only re-render calculated fields when focus leaves the entire form
-// This preserves tab navigation without destroying focus
-function softRefresh() {
-  setTimeout(() => {
-    const active = document.activeElement;
-    const inForm = active && active.classList.contains('num-input');
-    if (!inForm) {
-      renderPhase();
-      renderMonthBar();
-    } else {
-      // Just update calculated displays without full re-render
-      updateCalcDisplays();
-      updateOverall();
-    }
-  }, 50);
+// Save value and update calculated displays WITHOUT re-rendering the form
+// This preserves focus and allows tab to work naturally
+function setValAndCalc(phase, month, fieldId, value) {
+  setVal(phase, month, fieldId, value);
+  updateCalcDisplays();
+  updateOverall();
 }
 
 function updateCalcDisplays() {
   const phaseData = (S.data['E'] || {})[S.activeMonth] || {};
   PHASES['E'].groups.forEach(grp => {
+    // Update auto-calc field displays
     grp.items.filter(f => f.ro && f.calc).forEach(f => {
       const val = f.calc(phaseData);
       const el = document.querySelector(`[data-calc="${f.id}"]`);
-      if (el) {
-        if (val !== null && val !== undefined) {
-          el.textContent = f.type === 'currency'
-            ? '$' + Number(val).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})
-            : Number(val).toLocaleString();
-        } else {
-          el.textContent = '—';
-        }
+      if (!el) return;
+      if (val !== null && val !== undefined) {
+        el.textContent = f.type === 'currency'
+          ? '$' + Number(val).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})
+          : Number(val).toLocaleString();
+      } else {
+        el.textContent = '—';
       }
     });
+    // Update cross-check warnings in-place
+    if (grp.check) {
+      const sum = grp.check.fields.reduce((s,k) => s + (+phaseData[k]||0), 0);
+      const against = +phaseData[grp.check.against] || 0;
+      const bothEntered = against > 0 && grp.check.fields.some(k => phaseData[k] !== undefined);
+      const warnEl = document.querySelector(`[data-check="${grp.check.against}"]`);
+      if (warnEl) {
+        if (bothEntered && Math.abs(sum - against) > 0.01) {
+          warnEl.style.display = 'block';
+          warnEl.innerHTML = `⚠️ <strong>Check:</strong> ${grp.check.label} — current sum: <strong>${sum.toLocaleString()}</strong>, expected: <strong>${against.toLocaleString()}</strong>`;
+        } else {
+          warnEl.style.display = 'none';
+        }
+      }
+    }
   });
 }
 
