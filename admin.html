@@ -108,7 +108,10 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
   <div id="loginView" class="login-wrapper">
     <div class="card">
       <h2>Admin Login</h2>
-      <input type="password" class="login-input" id="pwInput" placeholder="Enter admin password" onkeydown="if(event.key==='Enter')doLogin()">
+      <input type="email" class="login-input" id="emailInput" placeholder="Admin email"
+        onkeydown="if(event.key==='Enter')document.getElementById('pwInput').focus()">
+      <input type="password" class="login-input" id="pwInput" placeholder="Password"
+        onkeydown="if(event.key==='Enter')doLogin()">
       <button class="btn btn-primary" style="width:100%" onclick="doLogin()">Login</button>
       <div id="loginError" class="alert alert-error hidden" style="margin-top:12px"></div>
     </div>
@@ -154,15 +157,18 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
 <!-- DETAIL MODAL (injected dynamically) -->
 <div id="modalContainer"></div>
 
+<!-- Supabase JS SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SUPABASE_URL = 'https://hktzvlkrimpfreeoehsi.supabase.co';
 const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhrdHp2bGtyaW1wZnJlZW9laHNpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MjQwNTEsImV4cCI6MjA5MDIwMDA1MX0.1bYxe1z-BFw4N9kvORaBsvGBVZfsw_cSOiOzsOnr3g0';
-const ADMIN_PW = 'trajectory-2026!';
+
+const { createClient } = supabase;
+const supabaseClient = createClient(SUPABASE_URL, ANON_KEY);
 
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const PHASE_NAMES = { A:'Acquisition & Retention', B:'Decision', C:'Payments', D:'Accounts Receivable', E:'Write-Off', F:'Recovery' };
 
-// Ref code → phase mapping based on number ranges
 function refToPhase(ref) {
   const num = parseFloat(ref);
   if (num >= 1 && num < 20) return 'A';
@@ -177,42 +183,63 @@ function refToPhase(ref) {
 let allSubmissions = [];
 
 // ============================================================
-// AUTH
+// AUTH — Supabase Auth (replaces hardcoded password)
 // ============================================================
-function doLogin() {
-  const pw = document.getElementById('pwInput').value;
-  if (pw === ADMIN_PW) {
-    document.getElementById('loginView').classList.add('hidden');
-    document.getElementById('adminView').classList.remove('hidden');
-    document.getElementById('logoutLink').classList.remove('hidden');
+async function checkSession() {
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  if (session) {
+    showPortal();
     loadSubmissions();
-  } else {
-    const err = document.getElementById('loginError');
-    err.textContent = 'Incorrect password.';
-    err.classList.remove('hidden');
   }
 }
 
-function logout() {
+async function doLogin() {
+  const email = document.getElementById('emailInput').value.trim();
+  const password = document.getElementById('pwInput').value;
+  const errEl = document.getElementById('loginError');
+
+  const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+
+  if (error) {
+    errEl.textContent = 'Invalid email or password. Please try again.';
+    errEl.classList.remove('hidden');
+  } else {
+    errEl.classList.add('hidden');
+    showPortal();
+    loadSubmissions();
+  }
+}
+
+async function logout() {
+  await supabaseClient.auth.signOut();
   document.getElementById('loginView').classList.remove('hidden');
   document.getElementById('adminView').classList.add('hidden');
   document.getElementById('logoutLink').classList.add('hidden');
+  document.getElementById('emailInput').value = '';
   document.getElementById('pwInput').value = '';
 }
 
+function showPortal() {
+  document.getElementById('loginView').classList.add('hidden');
+  document.getElementById('adminView').classList.remove('hidden');
+  document.getElementById('logoutLink').classList.remove('hidden');
+}
+
 // ============================================================
-// LOAD DATA
+// LOAD DATA — uses session token (authenticated user)
 // ============================================================
 async function loadSubmissions() {
   const tbody = document.getElementById('tableBody');
   tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:40px;color:#aaa">Loading...</td></tr>';
 
   try {
-    const resp = await fetch(`${SUPABASE_URL}/rest/v1/raw_submissions?select=*&order=submitted_at.desc`, {
-      headers: { 'apikey': ANON_KEY, 'Authorization': `Bearer ${ANON_KEY}` }
-    });
-    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-    allSubmissions = await resp.json();
+    const { data, error } = await supabaseClient
+      .from('raw_submissions')
+      .select('*')
+      .order('submitted_at', { ascending: false });
+
+    if (error) throw error;
+    allSubmissions = data;
     renderDashboard();
   } catch (err) {
     tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;padding:40px;color:#c00">Error loading: ${err.message}</td></tr>`;
@@ -220,18 +247,15 @@ async function loadSubmissions() {
 }
 
 // ============================================================
-// RENDER
+// RENDER (unchanged)
 // ============================================================
 function renderDashboard() {
-  // Summary cards
   const grid = document.getElementById('summaryGrid');
   const totalSubs = allSubmissions.length;
   const spreadsheet = allSubmissions.filter(s => s.upload_method === 'spreadsheet').length;
   const webform = allSubmissions.filter(s => s.upload_method === 'web_form').length;
   const totalFields = allSubmissions.reduce((sum, s) => sum + (s.field_count || 0), 0);
   const avgFields = totalSubs > 0 ? Math.round(totalFields / totalSubs) : 0;
-
-  // Count unique phases across all submissions
   const allPhases = new Set();
   allSubmissions.forEach(s => (s.phases_included || []).forEach(p => allPhases.add(p)));
 
@@ -243,7 +267,6 @@ function renderDashboard() {
     <div class="summary-item"><div class="count">${avgFields}</div><div class="label">Avg Fields / Submission</div></div>
   `;
 
-  // Table
   const tbody = document.getElementById('tableBody');
   if (totalSubs === 0) {
     tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:40px;color:#aaa">No submissions yet.</td></tr>';
@@ -254,11 +277,9 @@ function renderDashboard() {
     const date = new Date(s.submitted_at);
     const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
     const timeStr = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-    const phases = (s.phases_included || []).join(', ') || '—';
     const methodBadge = s.upload_method === 'spreadsheet'
       ? '<span class="badge badge-blue">Spreadsheet</span>'
       : '<span class="badge badge-green">Web Form</span>';
-
     const phaseBadges = (s.phases_included || []).map(p =>
       `<span class="badge badge-blue" style="margin-right:2px">${p}</span>`
     ).join('') || '<span class="badge badge-gray">None</span>';
@@ -279,21 +300,18 @@ function renderDashboard() {
 }
 
 // ============================================================
-// DETAIL MODAL
+// DETAIL MODAL (unchanged)
 // ============================================================
 function showDetail(index) {
   const s = allSubmissions[index];
   const data = s.data_json || {};
   const refs = Object.keys(data).sort((a, b) => parseFloat(a) - parseFloat(b));
-
-  // Group by phase
   const byPhase = {};
   for (const ref of refs) {
     const phase = refToPhase(ref) || '?';
     if (!byPhase[phase]) byPhase[phase] = [];
     byPhase[phase].push(ref);
   }
-
   const date = new Date(s.submitted_at);
   const dateStr = date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' });
 
@@ -301,7 +319,6 @@ function showDetail(index) {
   for (const phase of ['A','B','C','D','E','F']) {
     const phaseRefs = byPhase[phase];
     if (!phaseRefs || phaseRefs.length === 0) continue;
-
     let rows = '';
     for (const ref of phaseRefs) {
       const months = data[ref] || {};
@@ -313,12 +330,10 @@ function showDetail(index) {
       }).join('');
       rows += `<tr><td style="font-weight:500;color:var(--muted)">${ref}</td>${monthCells}</tr>`;
     }
-
     const filledCount = phaseRefs.filter(ref => {
       const months = data[ref] || {};
       return Object.values(months).some(v => v !== null && v !== undefined && v !== 'NA');
     }).length;
-
     phasesHTML += `
       <div class="modal-phase">
         <h3>Phase ${phase}: ${PHASE_NAMES[phase] || 'Unknown'} — ${filledCount}/${phaseRefs.length} fields with data</h3>
@@ -328,8 +343,7 @@ function showDetail(index) {
             <tbody>${rows}</tbody>
           </table>
         </div>
-      </div>
-    `;
+      </div>`;
   }
 
   document.getElementById('modalContainer').innerHTML = `
@@ -347,8 +361,7 @@ function showDetail(index) {
         </div>
         ${phasesHTML || '<p style="color:#aaa;padding:20px 0">No data found in this submission.</p>'}
       </div>
-    </div>
-  `;
+    </div>`;
 }
 
 function closeModal() {
@@ -356,42 +369,21 @@ function closeModal() {
 }
 
 // ============================================================
-// CSV EXPORT
+// CSV EXPORT (unchanged)
 // ============================================================
 function exportCSV() {
   if (allSubmissions.length === 0) { alert('No submissions to export.'); return; }
-
-  // Collect all unique ref codes across all submissions
   const allRefs = new Set();
-  allSubmissions.forEach(s => {
-    Object.keys(s.data_json || {}).forEach(ref => allRefs.add(ref));
-  });
+  allSubmissions.forEach(s => Object.keys(s.data_json || {}).forEach(ref => allRefs.add(ref)));
   const sortedRefs = [...allRefs].sort((a, b) => parseFloat(a) - parseFloat(b));
-
-  // Build CSV header
-  const headers = ['submission_id', 'session_token', 'company_code', 'submitted_at', 'upload_method', 'country', 'entity_type', 'phases', 'field_count'];
-  // Add ref_code columns for each month
+  const headers = ['submission_id','session_token','company_code','submitted_at','upload_method','country','entity_type','phases','field_count'];
   for (const ref of sortedRefs) {
-    for (const month of MONTHS) {
-      headers.push(`${ref}_${month.substring(0,3)}`);
-    }
+    for (const month of MONTHS) { headers.push(`${ref}_${month.substring(0,3)}`); }
   }
-
-  // Build rows
   const rows = [headers.join(',')];
   for (const s of allSubmissions) {
     const data = s.data_json || {};
-    const row = [
-      s.id,
-      s.session_token,
-      s.company_code || '',
-      s.submitted_at,
-      s.upload_method,
-      s.country || '',
-      s.entity_type || '',
-      (s.phases_included || []).join(';'),
-      s.field_count || 0
-    ];
+    const row = [s.id, s.session_token, s.company_code || '', s.submitted_at, s.upload_method, s.country || '', s.entity_type || '', (s.phases_included || []).join(';'), s.field_count || 0];
     for (const ref of sortedRefs) {
       const months = data[ref] || {};
       for (const month of MONTHS) {
@@ -401,24 +393,19 @@ function exportCSV() {
         else row.push(v);
       }
     }
-    rows.push(row.map(v => {
-      const str = String(v);
-      return str.includes(',') || str.includes('"') ? `"${str.replace(/"/g, '""')}"` : str;
-    }).join(','));
+    rows.push(row.map(v => { const str = String(v); return str.includes(',') || str.includes('"') ? `"${str.replace(/"/g,'""')}"` : str; }).join(','));
   }
-
-  // Download
   const blob = new Blob([rows.join('\n')], { type: 'text/csv' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = url;
-  a.download = `trma_benchmarking_export_${new Date().toISOString().slice(0,10)}.csv`;
-  a.click();
+  a.href = url; a.download = `trma_benchmarking_export_${new Date().toISOString().slice(0,10)}.csv`; a.click();
   URL.revokeObjectURL(url);
 }
 
-// Close modal on Escape
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+
+// Check for existing session on page load
+checkSession();
 </script>
 </body>
 </html>
