@@ -223,25 +223,38 @@ const PHASES = {
         {id:'E1a', lb:'$ Total Amount Written Off', type:'currency'},
         {id:'E1b', lb:'$ Total Revenue Billed (same period)', type:'currency'},
         {id:'E1c', lb:'# Accounts Written Off', type:'count'},
-        {id:'E1d', lb:'$ Average Balance at Write-Off', type:'currency'},
+        {id:'E1d', lb:'$ Average Balance at Write-Off', type:'currency', ro:true,
+          calc:(d)=> (+d['E1c']||0) > 0 ? (+d['E1a']||0) / (+d['E1c']||0) : null },
       ]},
-      { g: 'E2 — Write-Off by Reason', items: [
-        {id:'E2a', lb:'$ Written Off — Non-Pay (Credit Risk)', type:'currency'},
-        {id:'E2b', lb:'$ Written Off — Fraud', type:'currency'},
-        {id:'E2c', lb:'$ Written Off — Bankruptcy', type:'currency'},
-        {id:'E2d', lb:'$ Written Off — Other', type:'currency'},
-      ]},
-      { g: 'E3 — Write-Off Timing & Equipment', items: [
-        {id:'E3a', lb:'Average Days to Write-Off from First Delinquency', type:'days'},
-        {id:'E3b', lb:'# Accounts Written Off — Voluntary Churn', type:'count'},
-        {id:'E3c', lb:'# Accounts Written Off — Involuntary Churn', type:'count'},
-        {id:'E3d', lb:'# Accounts with Unreturned Equipment at Write-Off', type:'count'},
-        {id:'E3e', lb:'$ Equipment Value — Unreturned at Write-Off', type:'currency'},
-      ]},
-      { g: 'E4 — Post-Write-Off Internal Recovery', items: [
-        {id:'E4a', lb:'$ Recovered In-House After Write-Off', type:'currency'},
-        {id:'E4b', lb:'# Accounts Recovered In-House After Write-Off', type:'count'},
-      ]},
+      { g: 'E2 — Write-Off by Reason',
+        note: '💡 If you don\'t track reason codes, enter your total write-off amount in E2d (Other). The sum of E2a–E2d must equal E1a.',
+        check: { fields:['E2a','E2b','E2c','E2d'], against:'E1a', label:'E2 total must equal E1a (Total Written Off)' },
+        items: [
+          {id:'E2a', lb:'$ Written Off — Non-Pay (Credit Risk)', type:'currency'},
+          {id:'E2b', lb:'$ Written Off — Fraud', type:'currency'},
+          {id:'E2c', lb:'$ Written Off — Bankruptcy', type:'currency'},
+          {id:'E2d', lb:'$ Written Off — Other', type:'currency'},
+          {id:'E2total', lb:'$ Total by Reason (auto)', type:'currency', ro:true,
+            calc:(d)=>['E2a','E2b','E2c','E2d'].reduce((s,k)=>s+(+d[k]||0),0)},
+        ]},
+      { g: 'E3 — Write-Off Timing & Equipment',
+        note: '💡 If you don\'t track voluntary/involuntary breakdown, enter your total in E3c (Involuntary). The sum of E3b+E3c must equal E1c.',
+        check: { fields:['E3b','E3c'], against:'E1c', label:'E3b + E3c must equal E1c (# Accounts Written Off)' },
+        items: [
+          {id:'E3a', lb:'Average Days to Write-Off from First Delinquency', type:'days'},
+          {id:'E3b', lb:'# Accounts Written Off — Voluntary Churn', type:'count'},
+          {id:'E3c', lb:'# Accounts Written Off — Involuntary Churn', type:'count'},
+          {id:'E3total', lb:'# Total by Churn Type (auto)', type:'count', ro:true,
+            calc:(d)=>['E3b','E3c'].reduce((s,k)=>s+(+d[k]||0),0)},
+          {id:'E3d', lb:'# Accounts with Unreturned Equipment at Write-Off', type:'count'},
+          {id:'E3e', lb:'$ Equipment Value — Unreturned at Write-Off', type:'currency'},
+        ]},
+      { g: 'E4 — Total Post-Write-Off Recoveries',
+        note: '💡 Include all recoveries after write-off — internal collections, payment arrangements, and any amounts recovered before external placement.',
+        items: [
+          {id:'E4a', lb:'$ Total Recovered After Write-Off', type:'currency'},
+          {id:'E4b', lb:'# Accounts Recovered After Write-Off', type:'count'},
+        ]},
     ]
   }
 
@@ -506,8 +519,29 @@ function renderPhase() {
   const phaseData = (S.data['E'] || {})[S.activeMonth] || {};
 
   let html = '';
+  let tabIdx = 1;
+
   phase.groups.forEach(grp => {
-    html += `<div class="card"><div class="card-title">${grp.g}</div><table class="data-table">
+    // Cross-check warning
+    let checkWarning = '';
+    if (grp.check) {
+      const sum = grp.check.fields.reduce((s,k) => s + (+phaseData[k]||0), 0);
+      const against = +phaseData[grp.check.against] || 0;
+      const bothEntered = against > 0 && grp.check.fields.some(k => phaseData[k] !== undefined);
+      if (bothEntered && Math.abs(sum - against) > 0.01) {
+        checkWarning = `<div style="background:#fff3cd;border:1px solid #ffc107;border-radius:6px;padding:10px 14px;margin-bottom:12px;font-size:13px;color:#856404;">
+          ⚠️ <strong>Check:</strong> ${grp.check.label}
+          — current sum: <strong>${sum.toLocaleString()}</strong>, expected: <strong>${against.toLocaleString()}</strong>
+        </div>`;
+      }
+    }
+
+    // Section note
+    const noteHtml = grp.note
+      ? `<div style="background:#e8f4fd;border:1px solid #b8d4ef;border-radius:6px;padding:9px 14px;margin-bottom:12px;font-size:13px;color:#1B3A5C;">${grp.note}</div>`
+      : '';
+
+    html += `<div class="card"><div class="card-title">${grp.g}</div>${noteHtml}${checkWarning}<table class="data-table">
       <thead><tr><th style="width:70px">Ref</th><th>Field</th><th style="width:160px">Value</th></tr></thead><tbody>`;
 
     grp.items.forEach(f => {
@@ -516,16 +550,26 @@ function renderPhase() {
       const suffix = f.type === 'pct' ? '%' : (f.type === 'days' ? ' days' : '');
 
       if (f.ro) {
-        const displayVal = val !== '' && val !== null ? Number(val).toLocaleString() : '—';
-        html += `<tr style="background:#eef4fb;font-style:italic;color:var(--blue);"><td class="ref-col">${f.id}</td><td>${f.lb}</td><td><span style="font-weight:600;color:var(--blue);">${prefix}${displayVal}${suffix}</span></td></tr>`;
+        const displayVal = (val !== '' && val !== null && val !== undefined)
+          ? (f.type === 'currency' ? '$' + Number(val).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})
+            : Number(val).toLocaleString())
+          : '—';
+        html += `<tr style="background:#eef4fb;font-style:italic;color:var(--blue);">
+          <td class="ref-col">${f.id}</td>
+          <td>${f.lb} <span style="font-size:11px;color:#2176BC;font-weight:600;">(auto-calculated)</span></td>
+          <td><span data-calc="${f.id}" style="font-weight:600;color:var(--blue);">${displayVal}</span></td>
+        </tr>`;
       } else {
         html += `<tr>
           <td class="ref-col">${f.id}</td>
           <td>${f.lb}${prefix ? ` <span style="color:var(--muted);font-size:12px;">(${prefix})</span>` : ''}</td>
-          <td><input class="num-input" type="number" min="0" step="${f.type==='pct'?'0.01':'1'}"
-            value="${val}" placeholder="—"
-            onchange="setVal('E','${S.activeMonth}','${f.id}',this.value)"
-            onblur="refreshCalcs()" /></td>
+          <td><input class="num-input" type="number" min="0"
+            step="${f.type==='pct'?'0.01':'1'}"
+            value="${val}"
+            placeholder="—"
+            tabindex="${tabIdx++}"
+            oninput="setVal('E','${S.activeMonth}','${f.id}',this.value)"
+            onblur="softRefresh()" /></td>
         </tr>`;
       }
     });
@@ -554,6 +598,42 @@ function setVal(phase, month, fieldId, value) {
 function refreshCalcs() {
   renderPhase();
   renderMonthBar();
+}
+
+// Only re-render calculated fields when focus leaves the entire form
+// This preserves tab navigation without destroying focus
+function softRefresh() {
+  setTimeout(() => {
+    const active = document.activeElement;
+    const inForm = active && active.classList.contains('num-input');
+    if (!inForm) {
+      renderPhase();
+      renderMonthBar();
+    } else {
+      // Just update calculated displays without full re-render
+      updateCalcDisplays();
+      updateOverall();
+    }
+  }, 50);
+}
+
+function updateCalcDisplays() {
+  const phaseData = (S.data['E'] || {})[S.activeMonth] || {};
+  PHASES['E'].groups.forEach(grp => {
+    grp.items.filter(f => f.ro && f.calc).forEach(f => {
+      const val = f.calc(phaseData);
+      const el = document.querySelector(`[data-calc="${f.id}"]`);
+      if (el) {
+        if (val !== null && val !== undefined) {
+          el.textContent = f.type === 'currency'
+            ? '$' + Number(val).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})
+            : Number(val).toLocaleString();
+        } else {
+          el.textContent = '—';
+        }
+      }
+    });
+  });
 }
 
 function switchMonth(m) {
@@ -657,9 +737,6 @@ async function handleSubmit() {
     }
 
     localStorage.removeItem('trma_draft_E_' + S.profile.code);
-    document.getElementById('successToken').textContent = token;
-    document.getElementById('reportsLink').href = `reports.html?token=${token}`;
-    window._submissionToken = token;
     hide('screenEntry');
     show('screenSuccess');
 
